@@ -38,10 +38,10 @@ export default function EntryPage() {
         if (prev >= 100) {
           clearInterval(timer);
           // Small delay before showing the login page for smooth transition
-          setTimeout(() => setShowSplash(false), 1000);
+          setTimeout(() => setShowSplash(false), 800);
           return 100;
         }
-        return prev + 1.5;
+        return prev + 1.25;
       });
     }, 20);
 
@@ -117,7 +117,7 @@ export default function EntryPage() {
   // Splash Screen: "Welcome to Versora AI LMS"
   if (showSplash || isRedirecting) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-primary text-primary-foreground overflow-hidden">
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-primary text-primary-foreground overflow-hidden">
         <div className="relative flex flex-col items-center space-y-12 animate-in fade-in zoom-in duration-1000">
           {/* Animated Background Element */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />

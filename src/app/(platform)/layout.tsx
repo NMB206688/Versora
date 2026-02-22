@@ -5,14 +5,26 @@ import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Search, User, Loader2 } from "lucide-react";
+import { Bell, Search, User, Loader2, LogOut, Settings, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUser, useFirestore } from "@/firebase";
+import { useUser, useFirestore, useAuth } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const db = useFirestore();
+  const router = useRouter();
   const [role, setRole] = useState<"student" | "instructor" | "admin" | null>(null);
   const [isLoadingRole, setIsLoadingRole] = useState(true);
 
@@ -43,6 +55,15 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     }
     fetchRole();
   }, [user, isUserLoading, db]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   if (isUserLoading || isLoadingRole) {
     return (
@@ -75,9 +96,37 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <span className="absolute top-2.5 right-2.5 flex h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_rgba(255,100,150,0.5)]"></span>
             </Button>
             <div className="h-10 w-px bg-muted mx-2" />
-            <Button variant="ghost" className="rounded-xl overflow-hidden border-2 border-primary/10 p-0 h-10 w-10">
-              <User className="size-6 text-primary" />
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="rounded-xl overflow-hidden border-2 border-primary/10 p-0 h-10 w-10">
+                  <User className="size-6 text-primary" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-primary/10">
+                <DropdownMenuLabel className="font-headline font-bold px-4 pt-4 pb-2">
+                  My Identity
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{user?.email}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="mx-2 bg-muted" />
+                <DropdownMenuItem className="rounded-xl px-4 py-3 cursor-pointer group">
+                  <UserCircle className="size-4 mr-2 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span className="font-bold text-sm">Profile Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="rounded-xl px-4 py-3 cursor-pointer group">
+                  <Settings className="size-4 mr-2 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span className="font-bold text-sm">Preferences</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="mx-2 bg-muted" />
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="rounded-xl px-4 py-3 cursor-pointer group text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="size-4 mr-2" />
+                  <span className="font-bold text-sm">Terminate Session</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">
