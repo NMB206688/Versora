@@ -1,9 +1,8 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'EdTech OS | Intelligent LMS',
+  title: 'Versora AI LMS | Intelligent LMS',
   description: 'A modern, AI-powered learning management system for the future of education.',
 };
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -67,7 +66,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
             <Zap className="size-5" />
           </div>
           <span className="font-headline font-bold text-lg text-sidebar-foreground group-data-[collapsible=icon]:hidden">
-            EdTech OS
+            Versora AI LMS
           </span>
         </Link>
       </SidebarHeader>

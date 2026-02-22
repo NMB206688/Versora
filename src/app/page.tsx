@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +11,7 @@ export default function Home() {
           <Zap className="text-primary size-8" />
         </div>
         <h1 className="text-5xl font-headline font-bold text-primary leading-tight tracking-tight">
-          EdTech OS
+          Versora AI LMS
         </h1>
         <p className="text-xl text-muted-foreground font-medium">
           The intelligent operating system for modern education. Empowering students, 
