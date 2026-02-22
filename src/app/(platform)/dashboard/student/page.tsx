@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -24,7 +23,8 @@ import {
   Calendar,
   Search,
   Plus,
-  Globe
+  Globe,
+  Layout
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
