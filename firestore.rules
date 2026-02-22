@@ -1,0 +1,289 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * Versora AI LMS Security Rules
+     *
+     * CORE PHILOSOPHY:
+     * This ruleset implements a robust, role-based authorization model designed for an EdTech ecosystem.
+     * It prioritizes "Authorization Independence" by leveraging denormalized data (like instructor IDs
+     * and advisor IDs) directly on documents, minimizing costly cross-document lookups.
+     *
+     * DATA STRUCTURE:
+     * - User-Centric Data: Most student-specific records (submissions, progress, goals) are nested
+     *   under `/users/{userId}` to enforce clear ownership boundaries.
+     * - Global Catalogs: Shared entities like Skills, Courses, and Citation Styles are top-level.
+     * - Role Verification: Dedicated collections (e.g., `/roles_admin`) act as high-performance
+     *   lookups for validating specific institutional roles.
+     *
+     * KEY SECURITY DECISIONS:
+     * - Strict Ownership: Users can generally only read and write their own profile and sub-data.
+     * - Denormalization for Authorization: Critical fields like `courseInstructorId` or
+     *   `associatedInstructorIds` are replicated across sub-entities to allow instantaneous
+     *   permission checks without parent document reads.
+     * - Public Read/Private Write: Global resources are often publicly readable but strictly
+     *   writable only by Admins or authorized Authors.
+     * - Prototyping Flexibility: Rules focus on "Who" can access data, while remaining flexible
+     *   on the specific schema/types of content to allow for rapid iterative development.
+     */
+
+    // --- Helper Functions ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Checks if the user exists in a specific role existence collection
+    function hasRole(roleCollection, uid) {
+      return exists(/databases/$(database)/documents/$(roleCollection)/$(uid));
+    }
+
+    function isAdmin() {
+      return hasRole('roles_admin', request.auth.uid);
+    }
+
+    function isInstructor() {
+      return hasRole('roles_instructor', request.auth.uid);
+    }
+
+    function isFinancialStaff() {
+      return hasRole('roles_financial_aid_staff', request.auth.uid);
+    }
+
+    function isAthleticStaff() {
+      return hasRole('roles_athletic_staff', request.auth.uid);
+    }
+
+    function isInternationalStaff() {
+      return hasRole('roles_international_staff', request.auth.uid);
+    }
+
+    // Use for update/delete to ensure document exists and ownership is valid
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // Validates if the user is in a list of IDs (e.g., associatedInstructorIds)
+    function isLinkedUser(userList) {
+      return isSignedIn() && (request.auth.uid in userList);
+    }
+
+    // --- Rules ---
+
+    /**
+     * @description Access rules for User profiles.
+     * @path /users/{userId}
+     * @allow (create) if auth.uid matches path; (update) if user is owner.
+     * @deny (read) if user is not signed in.
+     * @principle Self-creation and ownership for core profile data.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == userId;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Existence collections for institutional roles.
+     * @path /roles_{roleType}/{uid} (covered by /{collection}/{uid} match)
+     * @allow (get) if signed in; (list) if Admin; (write) if Admin.
+     * @principle Restricted write access to role definitions, open for verification lookups.
+     *
+     * NOTE: The nested `match /roles_{roleType}/{uid}` was syntactically incorrect.
+     *       The general `match /{collection}/{uid}` already applies to role collections
+     *       like `/roles_admin/{uid}` and enforces appropriate security.
+     *       `get` is allowed for signed-in users (for `hasRole` checks), `list` and `write` are
+     *       restricted to admins for security.
+     */
+    match /{collection}/{uid} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    /**
+     * @description Top-level Course documents.
+     * @path /courses/{courseId}
+     * @allow (get) if published or user is instructor; (write) if user is assigned instructor.
+     * @principle Ownership-based writes for faculty; visibility control via isPublished.
+     */
+    match /courses/{courseId} {
+      allow get: if resource.data.isPublished == true || isLinkedUser([resource.data.instructorId]) || isAdmin();
+      allow list: if isSignedIn();
+      allow create: if isInstructor() && request.resource.data.instructorId == request.auth.uid;
+      allow update: if resource != null && (request.resource.data.instructorId == request.auth.uid || isAdmin());
+      allow delete: if resource != null && (resource.data.instructorId == request.auth.uid || isAdmin());
+    }
+
+    /**
+     * @description Sub-collections of Courses (Modules, Content, Assignments, etc.).
+     * @path /courses/{courseId}/(sub-collections)/{id}
+     * @allow (read) if signed in; (write) if user matches denormalized courseInstructorId.
+     * @principle Uses denormalized context for path-independent authorization.
+     */
+    match /courses/{courseId}/{subCollection}/{id} {
+      allow read: if isSignedIn();
+      allow create: if isInstructor() && request.resource.data.courseInstructorId == request.auth.uid;
+      allow update: if resource != null && (resource.data.courseInstructorId == request.auth.uid || isAdmin());
+      allow delete: if resource != null && (resource.data.courseInstructorId == request.auth.uid || isAdmin());
+    }
+
+    /**
+     * @description Student assignment submissions.
+     * @path /users/{studentId}/submissions/{submissionId}
+     * @allow (create/update) if owner; (get) if owner or linked instructor.
+     * @principle Student ownership with specific instructor visibility via denormalization.
+     */
+    match /users/{studentId}/submissions/{submissionId} {
+      allow get: if isOwner(studentId) || isLinkedUser([resource.data.courseInstructorId]) || isAdmin();
+      allow list: if isOwner(studentId) || isInstructor() || isAdmin();
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if (resource != null && isOwner(studentId)) || (resource != null && isLinkedUser([resource.data.courseInstructorId]));
+      allow delete: if isExistingOwner(studentId) || isAdmin();
+    }
+
+    /**
+     * @description User notifications.
+     * @path /users/{userId}/notifications/{notificationId}
+     * @allow (read/update) if owner.
+     * @principle Strict user-only access to private inbox.
+     */
+    match /users/{userId}/notifications/{notificationId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isSignedIn(); // Allow system or other users to notify
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Portfolio and Bibliography items.
+     * @path /users/{studentId}/portfolioItems/{id} OR bibliographyEntries/{id}
+     * @allow (all) if owner.
+     * @principle Personal workspace management for students.
+     */
+    match /users/{studentId}/{collection}/{id} {
+      // Applies to portfolioItems, bibliographyEntries, and goals
+      allow get, list: if isOwner(studentId) || isLinkedUser(resource.data.assignedAdvisorIds) || isAdmin();
+      allow create: if isOwner(studentId) && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(studentId) || isLinkedUser(resource.data.assignedAdvisorIds);
+      allow delete: if isExistingOwner(studentId);
+    }
+
+    /**
+     * @description Global catalogues (Skills, Citation Styles).
+     * @path /skills/{id} or /citationStyles/{id}
+     * @allow (read) if signed in; (write) if Admin.
+     * @principle Public catalog with centralized admin management.
+     */
+    match /{catalogCollection}/{id} {
+      // Filter for Skills and CitationStyles
+      allow read: if (catalogCollection == "skills" || catalogCollection == "citationStyles") && isSignedIn();
+      allow write: if (catalogCollection == "skills" || catalogCollection == "citationStyles") && isAdmin();
+    }
+
+    /**
+     * @description Events and Job Opportunities.
+     * @path /events/{id} or /jobOpportunities/{id}
+     * @allow (read) if signed in; (write) if Author/Admin.
+     * @principle Author-based creation for global listings.
+     */
+    match /events/{eventId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if resource != null && (resource.data.organizerId == request.auth.uid || isAdmin());
+    }
+
+    match /jobOpportunities/{jobId} {
+      allow get, list: if isSignedIn();
+      allow create: if isAdmin() || hasRole('roles_publisher', request.auth.uid);
+      allow update, delete: if resource != null && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    /**
+     * @description Records for intervention, proficiency, and academic status.
+     * @path /users/{studentId}/(sensitive-sub-collections)/{id}
+     * @allow (get) if student or linked staff; (write) if authorized role.
+     * @principle Protects sensitive academic data while allowing access to defined stakeholders.
+     */
+    match /users/{studentId}/interventionRecords/{recordId} {
+      allow get, list: if isOwner(studentId) || isLinkedUser(resource.data.associatedInstructorIds) || isLinkedUser(resource.data.assignedAdvisorIds) || isAdmin();
+      allow create: if isInstructor() || isAdmin();
+      allow update: if resource != null && (resource.data.initiatorId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /users/{studentId}/financialAidRecords/{recordId} {
+      allow read: if isOwner(studentId) || isFinancialStaff() || isAdmin();
+      allow write: if isFinancialStaff() || isAdmin();
+    }
+
+    match /users/{studentId}/athleticEligibilityRecords/{recordId} {
+      allow read: if isOwner(studentId) || isAthleticStaff() || isAdmin();
+      allow write: if isAthleticStaff() || isAdmin();
+    }
+
+    match /users/{studentId}/internationalInfo/details {
+      allow read: if isOwner(studentId) || isInternationalStaff() || isAdmin();
+      allow write: if isInternationalStaff() || isAdmin();
+    }
+
+    /**
+     * @description Global External Resources with role-based visibility.
+     * @path /externalResources/{resourceId}
+     * @allow (read) if user role matches allowedRoles map in document.
+     * @principle Dynamic RBAC check using denormalized role map.
+     */
+    match /externalResources/{resourceId} {
+      allow get, list: if isSignedIn() && (
+        (isInstructor() && resource.data.isVisibleToRoles.hasAny(['Instructor', 'All'])) ||
+        (isOwner(request.auth.uid) && resource.data.isVisibleToRoles.hasAny(['Student', 'All'])) ||
+        isAdmin()
+      );
+      allow write: if isAdmin();
+    }
+
+    /**
+     * @description Newsletter Articles.
+     * @path /newsletterArticles/{articleId}
+     * @allow (read) if Published; (write) if Author.
+     * @principle Ownership writes and status-based public reads.
+     */
+    match /newsletterArticles/{articleId} {
+      allow get, list: if resource.data.status == "Published" || isLinkedUser([resource.data.authorId]) || isAdmin();
+      allow create: if hasRole('roles_publisher', request.auth.uid) || isAdmin();
+      allow update, delete: if resource != null && (resource.data.authorId == request.auth.uid || isAdmin());
+    }
+
+    /**
+     * @description Flat collection for Discussion Posts.
+     * @path /discussionPosts/{discussionPostId}
+     * @allow (read) if signed in; (write) if Author.
+     * @principle Flat structure for easier querying across courses while maintaining ownership.
+     */
+    match /discussionPosts/{discussionPostId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if resource != null && (resource.data.authorId == request.auth.uid || isAdmin());
+      allow delete: if resource != null && (resource.data.authorId == request.auth.uid || isAdmin() || isLinkedUser([resource.data.courseInstructorId]));
+    }
+
+    /**
+     * @description System configuration.
+     * @path /systemSettings/{settingId}
+     * @allow (read) if signed in; (write) if Admin.
+     * @principle Global configuration lockdown.
+     */
+    match /systemSettings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+  }
+}

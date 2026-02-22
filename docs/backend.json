@@ -1,0 +1,1669 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user within the EdTech OS platform, encompassing all roles such as Student, Instructor, Administrator, Advisor, and Publisher.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's primary email address.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The user's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The user's last name."
+        },
+        "role": {
+          "type": "string",
+          "description": "The primary role of the user within the platform, determining access and dashboard content.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profilePictureUrl": {
+          "type": "string",
+          "description": "URL to the user's profile picture.",
+          "format": "uri"
+        },
+        "notificationPreferences": {
+          "type": "string",
+          "description": "A JSON string or object storing the user's preferences for different types of notifications (e.g., email, push, SMS)."
+        },
+        "accessibilitySettings": {
+          "type": "string",
+          "description": "A JSON string or object storing the user's accessibility preferences (e.g., high-contrast mode, font size)."
+        },
+        "lastLogin": {
+          "type": "string",
+          "description": "Timestamp of the user's last login.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "role"
+      ]
+    },
+    "Course": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Course",
+      "type": "object",
+      "description": "Represents an academic course offered on the platform, containing modules, content, and assignments.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Course entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the course."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the course content and objectives."
+        },
+        "code": {
+          "type": "string",
+          "description": "A unique alphanumeric code for the course (e.g., 'HIST101')."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The official start date of the course.",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The official end date of the course.",
+          "format": "date"
+        },
+        "instructorId": {
+          "type": "string",
+          "description": "Reference to the User who is the primary instructor of this course. (Relationship: User 1:N Course)"
+        },
+        "syllabusUrl": {
+          "type": "string",
+          "description": "URL to the course syllabus document.",
+          "format": "uri"
+        },
+        "requiredCitationStyleId": {
+          "type": "string",
+          "description": "Reference to the CitationStyle required for assignments within this course. (Relationship: CitationStyle 1:N Course)"
+        },
+        "isPublished": {
+          "type": "boolean",
+          "description": "Indicates whether the course is visible and accessible to students."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "code",
+        "startDate",
+        "endDate",
+        "instructorId",
+        "isPublished"
+      ]
+    },
+    "Module": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Module",
+      "type": "object",
+      "description": "Represents a distinct organizational unit or section within a course, containing related content items.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Module entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the module."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the module's content."
+        },
+        "courseId": {
+          "type": "string",
+          "description": "Reference to the Course this module belongs to. (Relationship: Course 1:N Module)"
+        },
+        "orderIndex": {
+          "type": "number",
+          "description": "The numerical order of the module within its course, defining its sequence."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "courseId",
+        "orderIndex"
+      ]
+    },
+    "ContentItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContentItem",
+      "type": "object",
+      "description": "Represents a single piece of learning content or activity within a module, such as a video, document, or discussion.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ContentItem entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the content item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the content item."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of content item (e.g., 'Video', 'Document', 'Assignment', 'Discussion', 'Quiz', 'Link')."
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module this content item belongs to. (Relationship: Module 1:N ContentItem)"
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to the actual content resource, if external or a file.",
+          "format": "uri"
+        },
+        "orderIndex": {
+          "type": "number",
+          "description": "The numerical order of the content item within its module."
+        },
+        "estimatedCompletionTimeMinutes": {
+          "type": "number",
+          "description": "The estimated time in minutes required to complete or engage with this content item."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "type",
+        "moduleId",
+        "orderIndex"
+      ]
+    },
+    "Assignment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Assignment",
+      "type": "object",
+      "description": "Represents a graded task given to students within a course.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Assignment entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the assignment."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the assignment, including instructions."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The deadline for submitting the assignment.",
+          "format": "date-time"
+        },
+        "maxPoints": {
+          "type": "number",
+          "description": "The maximum points achievable for this assignment."
+        },
+        "courseId": {
+          "type": "string",
+          "description": "Reference to the Course this assignment belongs to. (Relationship: Course 1:N Assignment)"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module this assignment belongs to. (Relationship: Module 1:N Assignment)"
+        },
+        "rubricId": {
+          "type": "string",
+          "description": "Reference to the Rubric used for grading this assignment. (Relationship: Rubric 1:N Assignment)"
+        },
+        "requiredCitationStyleId": {
+          "type": "string",
+          "description": "Reference to the CitationStyle required for this assignment. (Relationship: CitationStyle 1:N Assignment)"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "dueDate",
+        "maxPoints",
+        "courseId",
+        "moduleId",
+        "rubricId",
+        "requiredCitationStyleId"
+      ]
+    },
+    "Rubric": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Rubric",
+      "type": "object",
+      "description": "Defines the grading criteria for an assignment, typically composed of multiple criteria with point values.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Rubric entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the rubric."
+        },
+        "description": {
+          "type": "string",
+          "description": "A general description of the rubric's purpose or focus."
+        },
+        "criteria": {
+          "type": "array",
+          "description": "An array of objects, each representing a specific grading criterion with its description and maximum points.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "criteria"
+      ]
+    },
+    "Submission": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Submission",
+      "type": "object",
+      "description": "Represents a student's submission for a particular assignment, including the content, grade, and feedback.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Submission entity."
+        },
+        "assignmentId": {
+          "type": "string",
+          "description": "Reference to the Assignment this submission is for. (Relationship: Assignment 1:N Submission)"
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User who submitted this assignment. (Relationship: User 1:N Submission)"
+        },
+        "submissionDate": {
+          "type": "string",
+          "description": "The date and time the assignment was submitted.",
+          "format": "date-time"
+        },
+        "submissionContentUrl": {
+          "type": "string",
+          "description": "URL to the actual submitted file or content.",
+          "format": "uri"
+        },
+        "grade": {
+          "type": "number",
+          "description": "The numerical grade received for the submission."
+        },
+        "instructorFeedback": {
+          "type": "string",
+          "description": "Qualitative feedback provided by the instructor."
+        },
+        "aiFeedback": {
+          "type": "string",
+          "description": "A JSON string or object containing AI-generated feedback and insights."
+        },
+        "isGraded": {
+          "type": "boolean",
+          "description": "Indicates whether the submission has been graded."
+        }
+      },
+      "required": [
+        "id",
+        "assignmentId",
+        "studentId",
+        "submissionDate",
+        "submissionContentUrl",
+        "isGraded"
+      ]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a notification sent to a user, alerting them to platform events or communications.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Notification entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who receives this notification. (Relationship: User 1:N Notification)"
+        },
+        "message": {
+          "type": "string",
+          "description": "The content of the notification message."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of notification (e.g., 'AssignmentDue', 'NewGrade', 'Announcement', 'DiscussionReply', 'SystemAlert')."
+        },
+        "linkUrl": {
+          "type": "string",
+          "description": "An optional URL that the user can click to navigate to the relevant content.",
+          "format": "uri"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates whether the user has read the notification."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the notification was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "message",
+        "type",
+        "isRead",
+        "createdAt"
+      ]
+    },
+    "StudentPortfolioItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentPortfolioItem",
+      "type": "object",
+      "description": "Represents a curated piece of work added by a student to their personal evidence-of-learning portfolio.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentPortfolioItem entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User who owns this portfolio item. (Relationship: User 1:N StudentPortfolioItem)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the portfolio item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the work and its context."
+        },
+        "assetUrl": {
+          "type": "string",
+          "description": "URL to the actual asset (e.g., document, image, video) of the portfolio item.",
+          "format": "uri"
+        },
+        "reflectionText": {
+          "type": "string",
+          "description": "The student's personal reflection on the learning and skills demonstrated by this work."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the portfolio item was added.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "title",
+        "assetUrl",
+        "reflectionText",
+        "createdAt"
+      ]
+    },
+    "Skill": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Skill",
+      "type": "object",
+      "description": "Represents a specific skill or competency that students can acquire and demonstrate, used in the Dynamic Skills Map.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Skill entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the skill (e.g., 'Critical Thinking', 'Python Programming')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of what the skill entails."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "StudentSkillProficiency": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentSkillProficiency",
+      "type": "object",
+      "description": "Tracks a student's proficiency level in a particular skill, updated through assignments or other learning activities.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentSkillProficiency entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) associated with this proficiency record. (Relationship: User 1:N StudentSkillProficiency)"
+        },
+        "skillId": {
+          "type": "string",
+          "description": "Reference to the Skill being tracked. (Relationship: Skill 1:N StudentSkillProficiency)"
+        },
+        "proficiencyLevel": {
+          "type": "number",
+          "description": "The student's numerical proficiency level for this skill (e.g., 0-100 percentage)."
+        },
+        "source": {
+          "type": "string",
+          "description": "The source of the proficiency update (e.g., 'AssignmentGrade', 'ManualOverride', 'CourseCompletion')."
+        },
+        "lastUpdatedAt": {
+          "type": "string",
+          "description": "The date and time when this proficiency level was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "skillId",
+        "proficiencyLevel",
+        "source",
+        "lastUpdatedAt"
+      ]
+    },
+    "BibliographyEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BibliographyEntry",
+      "type": "object",
+      "description": "Represents a single academic source entry managed in the Bibliography Builder, including its details and formatted citation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the BibliographyEntry entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) who owns this bibliography entry. (Relationship: User 1:N BibliographyEntry)"
+        },
+        "projectId": {
+          "type": "string",
+          "description": "An optional identifier to group bibliography entries belonging to a specific project."
+        },
+        "sourceType": {
+          "type": "string",
+          "description": "The type of academic source (e.g., 'Book', 'JournalArticle', 'Website', 'ConferencePaper')."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the source."
+        },
+        "authors": {
+          "type": "array",
+          "description": "An array of strings, each representing an author of the source.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "publicationYear": {
+          "type": "number",
+          "description": "The year the source was published."
+        },
+        "publisher": {
+          "type": "string",
+          "description": "The publisher of the source (e.g., for books)."
+        },
+        "journalName": {
+          "type": "string",
+          "description": "The name of the journal (for journal articles)."
+        },
+        "volume": {
+          "type": "number",
+          "description": "The volume number of the journal or publication."
+        },
+        "issue": {
+          "type": "number",
+          "description": "The issue number of the journal."
+        },
+        "pages": {
+          "type": "string",
+          "description": "The page numbers or range of the article/chapter."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL to access the source online.",
+          "format": "uri"
+        },
+        "citationStyleId": {
+          "type": "string",
+          "description": "Reference to the CitationStyle used for formatting this entry. (Relationship: CitationStyle 1:N BibliographyEntry)"
+        },
+        "formattedCitation": {
+          "type": "string",
+          "description": "The generated, formatted citation string for the entry."
+        },
+        "annotation": {
+          "type": "string",
+          "description": "An optional annotation or note about the source."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the bibliography entry was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "sourceType",
+        "title",
+        "authors",
+        "citationStyleId",
+        "formattedCitation",
+        "createdAt"
+      ]
+    },
+    "CitationStyle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CitationStyle",
+      "type": "object",
+      "description": "Defines an academic citation style (e.g., APA, MLA) and its associated formatting rules.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CitationStyle entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the citation style (e.g., 'APA 7th Edition')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the citation style."
+        },
+        "rulesSchema": {
+          "type": "string",
+          "description": "A JSON string or object defining the detailed formatting rules for this citation style, used by the AI."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "rulesSchema"
+      ]
+    },
+    "Event": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Event",
+      "type": "object",
+      "description": "Represents an event organized by the institution or community, relevant to students and faculty, managed through the Success Hubs.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Event entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the event."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the event, including its purpose and agenda."
+        },
+        "location": {
+          "type": "string",
+          "description": "The physical or virtual location of the event."
+        },
+        "startDateTime": {
+          "type": "string",
+          "description": "The start date and time of the event.",
+          "format": "date-time"
+        },
+        "endDateTime": {
+          "type": "string",
+          "description": "The end date and time of the event.",
+          "format": "date-time"
+        },
+        "eventUrl": {
+          "type": "string",
+          "description": "An optional URL for more information or registration for the event.",
+          "format": "uri"
+        },
+        "targetAudience": {
+          "type": "array",
+          "description": "An array of strings indicating the target audience for the event (e.g., 'International Students', 'Local Students', 'Athletes', 'All').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "organizerId": {
+          "type": "string",
+          "description": "Reference to the User who organized the event. (Relationship: User 1:N Event)"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "location",
+        "startDateTime",
+        "endDateTime",
+        "targetAudience"
+      ]
+    },
+    "JobOpportunity": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobOpportunity",
+      "type": "object",
+      "description": "Represents a job, internship, or career opportunity listed on the Career Opportunity Gateway.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the JobOpportunity entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the job or opportunity."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the job responsibilities and requirements."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the company offering the opportunity."
+        },
+        "location": {
+          "type": "string",
+          "description": "The location of the job (e.g., 'Remote', 'New York, NY')."
+        },
+        "jobType": {
+          "type": "string",
+          "description": "The type of employment (e.g., 'Full-time', 'Part-time', 'Internship', 'Contract')."
+        },
+        "applicationDeadline": {
+          "type": "string",
+          "description": "The deadline for submitting applications.",
+          "format": "date"
+        },
+        "applicationUrl": {
+          "type": "string",
+          "description": "URL where interested candidates can apply.",
+          "format": "uri"
+        },
+        "skillIds": {
+          "type": "array",
+          "description": "An array of Skill IDs indicating the required skills for this opportunity. (Relationship: Skill N:N JobOpportunity)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "companyName",
+        "jobType",
+        "applicationUrl"
+      ]
+    },
+    "InterventionRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InterventionRecord",
+      "type": "object",
+      "description": "Documents a proactive intervention initiated by an instructor or advisor for a student identified as at-risk.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InterventionRecord entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) who is the subject of this intervention. (Relationship: User 1:N InterventionRecord)"
+        },
+        "initiatorId": {
+          "type": "string",
+          "description": "Reference to the User (instructor/advisor) who initiated the intervention. (Relationship: User 1:N InterventionRecord)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of intervention (e.g., 'CheckInMessage', 'ResourceRecommendation', 'TutoringReferral')."
+        },
+        "details": {
+          "type": "string",
+          "description": "Specific details or content of the intervention (e.g., message text, recommended resource link)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the intervention (e.g., 'Pending', 'Completed', 'Cancelled')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the intervention was initiated.",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "The date and time the intervention was completed or resolved.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "initiatorId",
+        "type",
+        "status",
+        "createdAt"
+      ]
+    },
+    "ExternalResource": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ExternalResource",
+      "type": "object",
+      "description": "Represents a globally managed external link or resource available across the platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ExternalResource entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The display title of the external resource."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what the resource offers."
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the external resource.",
+          "format": "uri"
+        },
+        "category": {
+          "type": "string",
+          "description": "A category for organizing external resources (e.g., 'Library', 'IT Support', 'University Policies')."
+        },
+        "isVisibleToRoles": {
+          "type": "array",
+          "description": "An array of strings indicating which user roles can view this resource (e.g., ['Student', 'Instructor', 'All']).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the resource was added.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time the resource was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "url",
+        "category",
+        "isVisibleToRoles"
+      ]
+    },
+    "NewsletterArticle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "NewsletterArticle",
+      "type": "object",
+      "description": "Represents an article or news post created using the Newsletter & Journalism Studio, intended for communication to users.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the NewsletterArticle entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the newsletter article."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A unique, URL-friendly identifier for the article."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to the User who authored the article. (Relationship: User 1:N NewsletterArticle)"
+        },
+        "contentHtml": {
+          "type": "string",
+          "description": "The HTML content of the article."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the article (e.g., 'Draft', 'Scheduled', 'Published', 'Archived')."
+        },
+        "publishDate": {
+          "type": "string",
+          "description": "The date and time the article is scheduled or was published.",
+          "format": "date-time"
+        },
+        "heroImageUrl": {
+          "type": "string",
+          "description": "URL to the main image associated with the article.",
+          "format": "uri"
+        },
+        "tags": {
+          "type": "array",
+          "description": "An array of tags or keywords associated with the article.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "analyticsJson": {
+          "type": "string",
+          "description": "A JSON string or object storing analytics data for the article (e.g., open rate, click-throughs)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the article was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time the article was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "slug",
+        "authorId",
+        "contentHtml",
+        "status",
+        "createdAt"
+      ]
+    },
+    "StudentCourseProgress": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentCourseProgress",
+      "type": "object",
+      "description": "Tracks a student's overall progress and last activity within a specific course.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentCourseProgress entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) whose progress is being tracked. (Relationship: User 1:N StudentCourseProgress)"
+        },
+        "courseId": {
+          "type": "string",
+          "description": "Reference to the Course for which progress is being tracked. (Relationship: Course 1:N StudentCourseProgress)"
+        },
+        "completionPercentage": {
+          "type": "number",
+          "description": "The percentage of the course completed by the student (0-100)."
+        },
+        "lastAccessedContentItemId": {
+          "type": "string",
+          "description": "Reference to the last ContentItem the student accessed in this course. (Relationship: ContentItem 1:N StudentCourseProgress)"
+        },
+        "lastAccessedAt": {
+          "type": "string",
+          "description": "The date and time the student last accessed content in this course.",
+          "format": "date-time"
+        },
+        "enrollmentDate": {
+          "type": "string",
+          "description": "The date the student enrolled in the course.",
+          "format": "date"
+        },
+        "completionDate": {
+          "type": "string",
+          "description": "The date the student completed the course, if applicable.",
+          "format": "date"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "courseId",
+        "completionPercentage",
+        "enrollmentDate"
+      ]
+    },
+    "LearningOutcome": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "LearningOutcome",
+      "type": "object",
+      "description": "Defines a specific learning objective or outcome associated with a course or module, used in curriculum design.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the LearningOutcome entity."
+        },
+        "courseId": {
+          "type": "string",
+          "description": "Reference to the Course this learning outcome belongs to. (Relationship: Course 1:N LearningOutcome)"
+        },
+        "moduleId": {
+          "type": "string",
+          "description": "Reference to the Module this learning outcome belongs to, if specific to a module. (Relationship: Module 1:N LearningOutcome)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A clear statement describing what students should know or be able to do."
+        },
+        "alignedSkillIds": {
+          "type": "array",
+          "description": "An array of Skill IDs that this learning outcome helps develop. (Relationship: Skill N:N LearningOutcome)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "courseId",
+        "description"
+      ]
+    },
+    "StudentGoal": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentGoal",
+      "type": "object",
+      "description": "Represents a personal academic or learning goal set by a student, managed through the Momentum Planner.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentGoal entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) who set this goal. (Relationship: User 1:N StudentGoal)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title or brief description of the goal."
+        },
+        "description": {
+          "type": "string",
+          "description": "A more detailed description of the goal and what it entails."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The target date for completing the goal.",
+          "format": "date-time"
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "Indicates whether the goal has been achieved."
+        },
+        "assignmentId": {
+          "type": "string",
+          "description": "Optional reference to an Assignment if the goal is directly tied to completing a specific assignment. (Relationship: Assignment 1:N StudentGoal)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the goal was created.",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "The date and time the goal was marked as completed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "title",
+        "dueDate",
+        "isCompleted",
+        "createdAt"
+      ]
+    },
+    "SystemSetting": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SystemSetting",
+      "type": "object",
+      "description": "Stores various configuration settings for the platform, which can be global, institution-specific, or course-specific.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SystemSetting entity."
+        },
+        "key": {
+          "type": "string",
+          "description": "A unique key identifying the specific setting (e.g., 'ai_grading_llm_provider')."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the setting, stored as a JSON string to accommodate various data types and complex structures."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of what this setting controls."
+        },
+        "scope": {
+          "type": "string",
+          "description": "The scope of the setting (e.g., 'Global', 'Institution', 'Course')."
+        },
+        "scopeId": {
+          "type": "string",
+          "description": "An optional reference ID (e.g., Course ID) if the setting is scoped to a specific entity."
+        }
+      },
+      "required": [
+        "id",
+        "key",
+        "value",
+        "scope"
+      ]
+    },
+    "StudentFinancialAid": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentFinancialAid",
+      "type": "object",
+      "description": "Details a student's financial aid package, managed through the Student Financial & Athletics Hub.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentFinancialAid entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) receiving the financial aid. (Relationship: User 1:N StudentFinancialAid)"
+        },
+        "aidType": {
+          "type": "string",
+          "description": "The type of financial aid (e.g., 'Scholarship', 'Grant', 'Loan')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of financial aid awarded."
+        },
+        "academicYear": {
+          "type": "string",
+          "description": "The academic year for which the aid is awarded (e.g., '2023-2024')."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the financial aid (e.g., 'Awarded', 'Pending', 'Disbursed')."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional description of the aid package."
+        },
+        "disbursementDate": {
+          "type": "string",
+          "description": "The date the financial aid was or will be disbursed.",
+          "format": "date"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "aidType",
+        "amount",
+        "academicYear",
+        "status"
+      ]
+    },
+    "StudentAthleticEligibility": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentAthleticEligibility",
+      "type": "object",
+      "description": "Records a student-athlete's academic eligibility status for participation in sports.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentAthleticEligibility entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) whose athletic eligibility is being tracked. (Relationship: User 1:N StudentAthleticEligibility)"
+        },
+        "sport": {
+          "type": "string",
+          "description": "The sport the student participates in."
+        },
+        "academicYear": {
+          "type": "string",
+          "description": "The academic year for which the eligibility applies."
+        },
+        "eligibilityStatus": {
+          "type": "string",
+          "description": "The student's current athletic eligibility status (e.g., 'Eligible', 'Ineligible', 'Probation')."
+        },
+        "gpaRequirement": {
+          "type": "number",
+          "description": "The minimum GPA required for athletic eligibility."
+        },
+        "currentGpa": {
+          "type": "number",
+          "description": "The student's current GPA relevant to eligibility."
+        },
+        "lastCheckedAt": {
+          "type": "string",
+          "description": "The date and time the eligibility status was last checked or updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "sport",
+        "academicYear",
+        "eligibilityStatus",
+        "gpaRequirement",
+        "currentGpa",
+        "lastCheckedAt"
+      ]
+    },
+    "InternationalStudentInfo": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InternationalStudentInfo",
+      "type": "object",
+      "description": "Stores critical information and tracking details for international students, managed through the International Student Success Hub.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InternationalStudentInfo entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (international student) associated with this information. (Relationship: User 1:N InternationalStudentInfo)"
+        },
+        "visaType": {
+          "type": "string",
+          "description": "The type of visa held by the student (e.g., 'F-1', 'J-1')."
+        },
+        "visaExpirationDate": {
+          "type": "string",
+          "description": "The expiration date of the student's visa.",
+          "format": "date"
+        },
+        "i20Status": {
+          "type": "string",
+          "description": "The status of the student's I-20 form (e.g., 'Active', 'Expired', 'Pending')."
+        },
+        "optCptStatus": {
+          "type": "string",
+          "description": "A JSON string or object tracking the status of OPT/CPT applications."
+        },
+        "documentRequestHistory": {
+          "type": "string",
+          "description": "A JSON string or array of objects detailing past requests for official documents."
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "visaType",
+        "visaExpirationDate",
+        "i20Status"
+      ]
+    },
+    "CourseEnrollment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CourseEnrollment",
+      "type": "object",
+      "description": "Links a student to a specific course and tracks their enrollment status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CourseEnrollment entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the User (student) enrolled in the course. (Relationship: User 1:N CourseEnrollment)"
+        },
+        "courseId": {
+          "type": "string",
+          "description": "Reference to the Course the student is enrolled in. (Relationship: Course 1:N CourseEnrollment)"
+        },
+        "enrollmentDate": {
+          "type": "string",
+          "description": "The date and time the student enrolled in the course.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current enrollment status (e.g., 'Enrolled', 'Completed', 'Dropped')."
+        },
+        "gradeAchieved": {
+          "type": "string",
+          "description": "The final grade achieved in the course, if completed (e.g., 'A', 'B', 'Pass', 'Fail')."
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "courseId",
+        "enrollmentDate",
+        "status"
+      ]
+    },
+    "DiscussionPost": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DiscussionPost",
+      "type": "object",
+      "description": "Represents a post within a course discussion forum.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DiscussionPost entity."
+        },
+        "contentItemId": {
+          "type": "string",
+          "description": "Reference to the ContentItem of type 'Discussion' that this post belongs to. (Relationship: ContentItem 1:N DiscussionPost)"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to the User who authored this discussion post. (Relationship: User 1:N DiscussionPost)"
+        },
+        "parentPostId": {
+          "type": "string",
+          "description": "Reference to the parent post if this is a reply. Null if it's a top-level post. (Relationship: DiscussionPost 1:N DiscussionPost)"
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the discussion post."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the post was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "The date and time the post was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "contentItemId",
+        "authorId",
+        "content",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "User profiles, where `userId` is the Firebase Authentication UID. Includes denormalized `associatedInstructorIds` and `assignedAdvisorIds` for student-instructor/advisor linking."
+        }
+      },
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the Administrator role. Document ID `adminId` is the user's UID."
+        }
+      },
+      {
+        "path": "/roles_instructor/{instructorId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the Instructor role. Document ID `instructorId` is the user's UID."
+        }
+      },
+      {
+        "path": "/roles_advisor/{advisorId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the Advisor role. Document ID `advisorId` is the user's UID."
+        }
+      },
+      {
+        "path": "/roles_publisher/{publisherId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the Publisher role. Document ID `publisherId` is the user's UID."
+        }
+      },
+      {
+        "path": "/roles_financial_aid_staff/{staffId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the Financial Aid Staff role. Document ID `staffId` is the user's UID."
+        }
+      },
+      {
+        "path": "/roles_athletic_staff/{staffId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the Athletic Staff role. Document ID `staffId` is the user's UID."
+        }
+      },
+      {
+        "path": "/roles_international_staff/{staffId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Existence check collection for users with the International Student Staff role. Document ID `staffId` is the user's UID."
+        }
+      },
+      {
+        "path": "/courses/{courseId}",
+        "definition": {
+          "entityName": "Course",
+          "schema": {
+            "$ref": "#/backend/entities/Course"
+          },
+          "description": "Top-level collection for academic courses. `courseId` is the unique course identifier. Includes `instructorId` for ownership and `isPublished` for visibility control."
+        }
+      },
+      {
+        "path": "/courses/{courseId}/modules/{moduleId}",
+        "definition": {
+          "entityName": "Module",
+          "schema": {
+            "$ref": "#/backend/entities/Module"
+          },
+          "description": "Modules within a specific course. Documents include denormalized `courseInstructorId` and `courseIsPublished` from the parent `Course` for authorization independence."
+        }
+      },
+      {
+        "path": "/courses/{courseId}/contentItems/{contentItemId}",
+        "definition": {
+          "entityName": "ContentItem",
+          "schema": {
+            "$ref": "#/backend/entities/ContentItem"
+          },
+          "description": "Content items within a specific course. Documents include denormalized `courseInstructorId` and `courseIsPublished` from the parent `Course` for authorization independence. `moduleId` is an explicit field within the document."
+        }
+      },
+      {
+        "path": "/courses/{courseId}/assignments/{assignmentId}",
+        "definition": {
+          "entityName": "Assignment",
+          "schema": {
+            "$ref": "#/backend/entities/Assignment"
+          },
+          "description": "Assignments for a specific course. Documents include denormalized `courseInstructorId` and `courseIsPublished` from the parent `Course` for authorization independence."
+        }
+      },
+      {
+        "path": "/courses/{courseId}/rubrics/{rubricId}",
+        "definition": {
+          "entityName": "Rubric",
+          "schema": {
+            "$ref": "#/backend/entities/Rubric"
+          },
+          "description": "Rubrics specifically created for or associated with a course. Documents include denormalized `courseInstructorId` from the parent `Course` for authorization independence."
+        }
+      },
+      {
+        "path": "/courses/{courseId}/learningOutcomes/{outcomeId}",
+        "definition": {
+          "entityName": "LearningOutcome",
+          "schema": {
+            "$ref": "#/backend/entities/LearningOutcome"
+          },
+          "description": "Learning outcomes for a specific course. Documents include denormalized `courseInstructorId` and `courseIsPublished` from the parent `Course` for authorization independence."
+        }
+      },
+      {
+        "path": "/users/{studentId}/submissions/{submissionId}",
+        "definition": {
+          "entityName": "Submission",
+          "schema": {
+            "$ref": "#/backend/entities/Submission"
+          },
+          "description": "Student's submissions for assignments. `studentId` is the owner. Documents include denormalized `courseId` and `courseInstructorId` (from the associated `Assignment` and `Course`) for instructor access without `get()`."
+        }
+      },
+      {
+        "path": "/users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Personal notifications for a user, where `userId` is the recipient."
+        }
+      },
+      {
+        "path": "/users/{studentId}/portfolioItems/{portfolioItemId}",
+        "definition": {
+          "entityName": "StudentPortfolioItem",
+          "schema": {
+            "$ref": "#/backend/entities/StudentPortfolioItem"
+          },
+          "description": "Curated evidence-of-learning items owned by a student. `studentId` is the owner."
+        }
+      },
+      {
+        "path": "/skills/{skillId}",
+        "definition": {
+          "entityName": "Skill",
+          "schema": {
+            "$ref": "#/backend/entities/Skill"
+          },
+          "description": "Global catalog of skills and competencies. Read-only for most users, write access for administrators."
+        }
+      },
+      {
+        "path": "/users/{studentId}/skillProficiencies/{proficiencyId}",
+        "definition": {
+          "entityName": "StudentSkillProficiency",
+          "schema": {
+            "$ref": "#/backend/entities/StudentSkillProficiency"
+          },
+          "description": "Tracks a student's proficiency level in a particular skill. Documents include denormalized `associatedInstructorIds` and `assignedAdvisorIds` (from the student's User profile) for read access by linked instructors/advisors."
+        }
+      },
+      {
+        "path": "/users/{studentId}/bibliographyEntries/{entryId}",
+        "definition": {
+          "entityName": "BibliographyEntry",
+          "schema": {
+            "$ref": "#/backend/entities/BibliographyEntry"
+          },
+          "description": "Bibliography entries owned by a student. `studentId` is the owner."
+        }
+      },
+      {
+        "path": "/citationStyles/{styleId}",
+        "definition": {
+          "entityName": "CitationStyle",
+          "schema": {
+            "$ref": "#/backend/entities/CitationStyle"
+          },
+          "description": "Global catalog of academic citation styles. Read-only for most users, write access for administrators."
+        }
+      },
+      {
+        "path": "/events/{eventId}",
+        "definition": {
+          "entityName": "Event",
+          "schema": {
+            "$ref": "#/backend/entities/Event"
+          },
+          "description": "Global events organized by the institution or community. Includes `organizerId` for owner-based write access and `isPublished` field."
+        }
+      },
+      {
+        "path": "/jobOpportunities/{jobId}",
+        "definition": {
+          "entityName": "JobOpportunity",
+          "schema": {
+            "$ref": "#/backend/entities/JobOpportunity"
+          },
+          "description": "Global job and career opportunities. Documents include an `ownerId` (admin/publisher) for write access."
+        }
+      },
+      {
+        "path": "/users/{studentId}/interventionRecords/{recordId}",
+        "definition": {
+          "entityName": "InterventionRecord",
+          "schema": {
+            "$ref": "#/backend/entities/InterventionRecord"
+          },
+          "description": "Records of proactive interventions for at-risk students. Documents include `initiatorId` and denormalized `associatedInstructorIds` and `assignedAdvisorIds` (from the student's User profile) for read access by linked instructors/advisors."
+        }
+      },
+      {
+        "path": "/externalResources/{resourceId}",
+        "definition": {
+          "entityName": "ExternalResource",
+          "schema": {
+            "$ref": "#/backend/entities/ExternalResource"
+          },
+          "description": "Globally managed external links/resources. Documents include an `ownerId` (admin) for write access and an `allowedRoles` map for DBAC-compliant role-based read access (e.g., `{\"student\": true, \"instructor\": false}`)."
+        }
+      },
+      {
+        "path": "/newsletterArticles/{articleId}",
+        "definition": {
+          "entityName": "NewsletterArticle",
+          "schema": {
+            "$ref": "#/backend/entities/NewsletterArticle"
+          },
+          "description": "Newsletter articles published on the platform. Documents include `authorId` for ownership and `status` (Draft, Published) for visibility control."
+        }
+      },
+      {
+        "path": "/users/{studentId}/courseProgress/{courseId}",
+        "definition": {
+          "entityName": "StudentCourseProgress",
+          "schema": {
+            "$ref": "#/backend/entities/StudentCourseProgress"
+          },
+          "description": "Tracks a student's overall progress in a specific course. Document ID is the `courseId`. Includes denormalized `courseInstructorId` from the associated `Course` for instructor access."
+        }
+      },
+      {
+        "path": "/users/{studentId}/goals/{goalId}",
+        "definition": {
+          "entityName": "StudentGoal",
+          "schema": {
+            "$ref": "#/backend/entities/StudentGoal"
+          },
+          "description": "Personal academic goals set by a student. Documents include denormalized `assignedAdvisorIds` (from the student's User profile) for read/write access by linked advisors."
+        }
+      },
+      {
+        "path": "/systemSettings/{settingId}",
+        "definition": {
+          "entityName": "SystemSetting",
+          "schema": {
+            "$ref": "#/backend/entities/SystemSetting"
+          },
+          "description": "Global platform configuration settings. `settingId` is typically the key of the setting. Documents include an `ownerId` (admin) for write access."
+        }
+      },
+      {
+        "path": "/users/{studentId}/financialAidRecords/{recordId}",
+        "definition": {
+          "entityName": "StudentFinancialAid",
+          "schema": {
+            "$ref": "#/backend/entities/StudentFinancialAid"
+          },
+          "description": "Student's financial aid records. `studentId` is the owner. Read/write access for financial aid staff via `/roles_financial_aid_staff/{staffId}`."
+        }
+      },
+      {
+        "path": "/users/{studentId}/athleticEligibilityRecords/{recordId}",
+        "definition": {
+          "entityName": "StudentAthleticEligibility",
+          "schema": {
+            "$ref": "#/backend/entities/StudentAthleticEligibility"
+          },
+          "description": "Student-athlete's academic eligibility records. `studentId` is the owner. Read/write access for athletic staff via `/roles_athletic_staff/{staffId}`."
+        }
+      },
+      {
+        "path": "/users/{studentId}/internationalInfo/details",
+        "definition": {
+          "entityName": "InternationalStudentInfo",
+          "schema": {
+            "$ref": "#/backend/entities/InternationalStudentInfo"
+          },
+          "description": "International student-specific information. This is designed as a single document (`details`) per student. Read/write access for international student staff via `/roles_international_staff/{staffId}`."
+        }
+      },
+      {
+        "path": "/users/{studentId}/courseEnrollments/{enrollmentId}",
+        "definition": {
+          "entityName": "CourseEnrollment",
+          "schema": {
+            "$ref": "#/backend/entities/CourseEnrollment"
+          },
+          "description": "Records a student's enrollment in a course. Documents include denormalized `courseInstructorId` from the associated `Course` for instructor access without `get()`."
+        }
+      },
+      {
+        "path": "/discussionPosts/{discussionPostId}",
+        "definition": {
+          "entityName": "DiscussionPost",
+          "schema": {
+            "$ref": "#/backend/entities/DiscussionPost"
+          },
+          "description": "Discussion posts, stored in a flat collection for easier querying and QAP. Documents include `authorId`, `contentItemId`, denormalized `courseId`, and `courseInstructorId` for authorization independence."
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure for EdTech OS prioritizes security, scalability, and debuggability by strictly adhering to the core design principles and mandates. The design centralizes user-specific data under `/users/{userId}` subcollections, enabling clear path-based ownership. Global, shared data like `Skills` and `CitationStyles` reside in top-level collections for easy discoverability and simpler access rules. Role-based access control (DBAC) is implemented using dedicated role collections (e.g., `/roles_admin/{adminId}`), which are checked via `exists()` in security rules, avoiding the use of custom claims.\n\n**Authorization Independence (CRITICAL) via Denormalization:**\nThe most critical aspect, authorization independence (avoiding `get()` calls in security rules for hierarchical dependencies), is achieved through extensive denormalization. For any subcollection whose access relies on an ancestor's attributes (e.g., a `ContentItem` requiring the `instructorId` from its parent `Course`), the necessary authorization context (like `courseId`, `courseInstructorId`, `courseIsPublished`, `associatedInstructorIds`, `assignedAdvisorIds`) is explicitly copied into the subcollection's documents. This allows security rules to evaluate access based solely on the `request.auth.uid` and the `resource.data` of the document being accessed, ensuring atomic and easily debuggable operations. For example:\n*   `Module`, `ContentItem`, `Assignment`, `Rubric`, `LearningOutcome`, `StudentCourseProgress`, `CourseEnrollment` documents all denormalize `courseInstructorId` (and `courseIsPublished` where relevant) from their respective `Course` parents.\n*   Student-specific collections like `StudentSkillProficiency`, `InterventionRecord`, and `StudentGoal` include `associatedInstructorIds` and `assignedAdvisorIds` (derived from the student's main `/users/{studentId}` profile, which aggregates these from `CourseEnrollments` and advisor assignments) directly in their documents. This means an instructor/advisor can read a student's data if their UID is in these denormalized lists, without needing to `get()` the student's profile or any related course/enrollment records within the rule itself.\n\n**QAPs (Rules are not Filters) and Structural Segregation:**\nStructural segregation ensures that documents within a collection share the same security posture, simplifying security rules and enabling efficient 'query-as-you-protect' (QAP) patterns for `list` operations. Examples include:\n*   All data private to a student (e.g., `submissions`, `notifications`, `portfolioItems`) is stored under `/users/{studentId}/...` paths. This inherently scopes `list` queries to the authenticated user's `uid`, making rules like `allow list: if request.auth.uid == userId;` straightforward and efficient.\n*   Global entities like `Skills`, `CitationStyles`, `Events`, `JobOpportunities`, `NewsletterArticles`, and `ExternalResources` are placed in top-level collections. Access to these is typically broad (e.g., read by all authenticated users, or filtered by `isPublished` / `status` fields directly in the document). Write access is restricted to `ownerId` (e.g., for `Events`, `NewsletterArticles`) or specific `roles_admin` members.\n*   For `ExternalResource` and other globally accessible items with role-based visibility, the `allowedRoles` map (e.g., `{\"student\": true, \"instructor\": false}`) is denormalized directly into the document. Security rules can then check `exists(/roles_student/$(request.auth.uid)) && resource.data.allowedRoles.student == true`, which is DBAC compliant and avoids complex role inference.\n\n**Acknowledgement of UI/UX Request:**\nThe user's request regarding the login page, welcome screen, and graphical elements is a UI/UX concern and does not directly impact the Firestore data structure. The proposed Firestore structure is agnostic to these frontend presentation layers but fully supports the data needs that would drive such a user interface."
+  }
+}
