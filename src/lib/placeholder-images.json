@@ -1,3 +1,34 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "student-dashboard-hero",
+      "description": "A student using a laptop in a modern library",
+      "imageUrl": "https://images.unsplash.com/photo-1722248540590-ba8b7af1d7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdHVkZW50JTIwbGlicmFyeXxlbnwwfHx8fDE3NzE2NTIyMTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "student library"
+    },
+    {
+      "id": "course-thumbnail-1",
+      "description": "Abstract science concept",
+      "imageUrl": "https://images.unsplash.com/photo-1562519493-06ebe4871278?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzY2llbmNlJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzcxNzQ3OTQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "science abstract"
+    },
+    {
+      "id": "course-thumbnail-2",
+      "description": "Modern architecture",
+      "imageUrl": "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzcxNzQ3MDk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "course-thumbnail-3",
+      "description": "Data analytics visualization",
+      "imageUrl": "https://images.unsplash.com/photo-1584291527908-033f4d6542c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZGF0YSUyMGFuYWx5dGljc3xlbnwwfHx8fDE3NzE3NDc5NDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "data analytics"
+    },
+    {
+      "id": "instructor-hero",
+      "description": "An instructor lecturing in a bright classroom",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1550946107-8842ae9426db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx0ZWFjaGVyJTIwY2xhc3Nyb29tfGVufDB8fHx8MTc3MTY5MTE3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "teacher classroom"
+    }
+  ]
 }
