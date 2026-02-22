@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import { 
   Plus, 
   Settings, 
@@ -24,7 +25,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function CourseContentStudio({ params }: { params: { id: string } }) {
+export default function CourseContentStudio({ params }: { params: Promise<{ id: string }> }) {
+  // Use React.use() to unwrap the params promise for Next.js 15 compatibility
+  const resolvedParams = use(params);
   const [activeTab, setActiveTab] = useState("studio");
 
   const modules = [
@@ -65,7 +68,7 @@ export default function CourseContentStudio({ params }: { params: { id: string }
       <div className="h-24 border-b flex items-center justify-between px-10 shrink-0 bg-white sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-10">
           <div className="space-y-1">
-            <h2 className="text-2xl font-headline font-bold text-primary tracking-tight">CS101: Content Studio</h2>
+            <h2 className="text-2xl font-headline font-bold text-primary tracking-tight">{resolvedParams.id.toUpperCase()}: Content Studio</h2>
             <div className="flex items-center gap-3 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
               <span className="flex items-center gap-1"><Layout className="size-3" /> Section A</span>
               <span className="text-primary/20 opacity-50">•</span>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -13,10 +14,13 @@ import {
   Sparkles,
   Zap,
   Briefcase,
-  Globe
+  Globe,
+  LogOut
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { useAuth } from "@/firebase";
 
 import {
   Sidebar,
@@ -33,6 +37,17 @@ import {
 
 export function AppSidebar({ role = "student" }: { role?: "student" | "instructor" | "admin" }) {
   const pathname = usePathname();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   const navigation = {
     student: [
@@ -50,7 +65,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
       { name: "Analytics Hub", href: "/features/insights", icon: Sparkles },
     ],
     admin: [
-      { name: "System Health", href: "/admin/health", icon: Zap },
+      { name: "System Health", href: "/dashboard/admin", icon: Zap },
       { name: "Program Innovation", href: "/admin/innovation", icon: Sparkles },
       { name: "User Management", href: "/admin/users", icon: Users },
     ]
@@ -99,7 +114,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Global Scholars">
-                <Link href="/features/global-scholars">
+                <Link href="/hubs/international-students">
                   <Globe className="size-4" />
                   <span>Global Scholars</span>
                 </Link>
@@ -127,11 +142,9 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Support">
-              <Link href="/support">
-                <HelpCircle className="size-4" />
-                <span>Support</span>
-              </Link>
+            <SidebarMenuButton onClick={handleLogout} tooltip="Logout" className="text-red-300 hover:text-red-100 hover:bg-red-500/10">
+              <LogOut className="size-4" />
+              <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
