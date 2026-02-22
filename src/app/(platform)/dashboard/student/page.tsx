@@ -27,6 +27,7 @@ import {
   Layout
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { 
   ResponsiveContainer, 
@@ -59,9 +60,9 @@ export default function StudentDashboard() {
   ];
 
   const courses = [
-    { title: "Introduction to Quantum Physics", progress: 65, instructor: "Dr. Aris Thorne", category: "Science", icon: <Zap className="size-4" />, color: "bg-blue-500" },
-    { title: "Global Economics 101", progress: 42, instructor: "Prof. Sarah Miller", category: "Finance", icon: <LineChart className="size-4" />, color: "bg-orange-500" },
-    { title: "Advanced Data Structures", progress: 88, instructor: "Elena Rodriguez", category: "CS", icon: <BookOpen className="size-4" />, color: "bg-purple-500" },
+    { id: "cs101", title: "Introduction to Quantum Physics", progress: 65, instructor: "Dr. Aris Thorne", category: "Science", icon: <Zap className="size-4" />, color: "bg-blue-500" },
+    { id: "eco202", title: "Global Economics 101", progress: 42, instructor: "Prof. Sarah Miller", category: "Finance", icon: <LineChart className="size-4" />, color: "bg-orange-500" },
+    { id: "hist105", title: "Advanced Data Structures", progress: 88, instructor: "Elena Rodriguez", category: "CS", icon: <BookOpen className="size-4" />, color: "bg-purple-500" },
   ];
 
   const feedbackInsights = [
@@ -95,11 +96,15 @@ export default function StudentDashboard() {
           </div>
           <h2 className="text-4xl md:text-5xl font-headline font-bold leading-[1.1] tracking-tight">Your next academic leap <br/> starts here.</h2>
           <div className="flex flex-wrap gap-3 md:gap-4 pt-2">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-8 font-bold shadow-xl shadow-black/10 transition-all active:scale-95">
-              <Play className="size-5 mr-2" /> Resume Learning
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-8 font-bold shadow-xl shadow-black/10 transition-all active:scale-95">
+              <Link href="/course/cs101">
+                <Play className="size-5 mr-2" /> Resume Learning
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-2xl h-14 px-8 backdrop-blur-sm border-2 font-bold transition-all active:scale-95">
-              My Schedule
+            <Button asChild size="lg" variant="outline" className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-2xl h-14 px-8 backdrop-blur-sm border-2 font-bold transition-all active:scale-95">
+              <Link href="/features/momentum-planner">
+                <Calendar className="size-5 mr-2" /> My Schedule
+              </Link>
             </Button>
           </div>
         </div>
@@ -116,8 +121,10 @@ export default function StudentDashboard() {
                 <TabsTrigger value="curriculum" className="rounded-xl px-6 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm">Curriculum</TabsTrigger>
                 <TabsTrigger value="skills" className="rounded-xl px-6 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm">Skills Map</TabsTrigger>
               </TabsList>
-              <Button variant="ghost" className="hidden md:flex items-center gap-2 font-bold text-primary text-xs uppercase tracking-widest hover:bg-primary/5 transition-colors">
-                Full Catalog <ChevronRight className="size-4" />
+              <Button asChild variant="ghost" className="hidden md:flex items-center gap-2 font-bold text-primary text-xs uppercase tracking-widest hover:bg-primary/5 transition-colors">
+                <Link href="/features/course-catalog">
+                  Full Catalog <ChevronRight className="size-4" />
+                </Link>
               </Button>
             </div>
 
@@ -145,22 +152,26 @@ export default function StudentDashboard() {
                         </div>
                         <Progress value={course.progress} className="h-1.5 bg-muted/50" />
                       </div>
-                      <Button variant="secondary" className="w-full h-11 rounded-xl group font-bold bg-muted/30 hover:bg-primary hover:text-white transition-all text-xs">
-                        Open Classroom <ArrowUpRight className="size-3 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      <Button asChild variant="secondary" className="w-full h-11 rounded-xl group font-bold bg-muted/30 hover:bg-primary hover:text-white transition-all text-xs">
+                        <Link href={`/course/${course.id}`}>
+                          Open Classroom <ArrowUpRight className="size-3 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        </Link>
                       </Button>
                     </CardContent>
                   </Card>
                 ))}
                 
                 {/* Add Course Placeholder */}
-                <Card className="border-2 border-dashed border-primary/10 bg-transparent rounded-[2rem] flex items-center justify-center p-8 group cursor-pointer hover:bg-primary/5 transition-all">
-                  <div className="text-center space-y-4">
-                    <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                      <Plus className="size-6 text-primary" />
+                <Link href="/features/course-catalog" className="contents">
+                  <Card className="border-2 border-dashed border-primary/10 bg-transparent rounded-[2rem] flex items-center justify-center p-8 group cursor-pointer hover:bg-primary/5 transition-all">
+                    <div className="text-center space-y-4">
+                      <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                        <Plus className="size-6 text-primary" />
+                      </div>
+                      <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Enroll in a new course</p>
                     </div>
-                    <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Enroll in a new course</p>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               </div>
 
               {/* Momentum Planner (StudentGoal Integration) */}
@@ -172,7 +183,9 @@ export default function StudentDashboard() {
                     </CardTitle>
                     <CardDescription className="font-medium">Strategic goals for your current academic phase.</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" className="rounded-xl border-primary/10 font-bold h-9 hover:bg-primary/5 transition-colors">Manage Goals</Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-xl border-primary/10 font-bold h-9 hover:bg-primary/5 transition-colors">
+                    <Link href="/features/momentum-planner">Manage Goals</Link>
+                  </Button>
                 </CardHeader>
                 <CardContent className="p-8 pt-4 space-y-6">
                    {goals.map(goal => (
@@ -204,14 +217,18 @@ export default function StudentDashboard() {
                          Your intelligence profile is generated by cross-referencing assignment performance with institutional learning outcomes.
                        </p>
                        <div className="space-y-4 pt-4">
-                          <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 transition-all hover:shadow-lg hover:shadow-primary/5 group cursor-default">
-                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2">Core Competency</p>
-                             <p className="text-lg font-headline font-bold text-primary group-hover:scale-[1.02] transition-transform origin-left">Academic Writing (94%)</p>
-                          </div>
-                          <div className="p-5 bg-accent/5 rounded-2xl border border-accent/10 transition-all hover:shadow-lg hover:shadow-accent/5 group cursor-default">
-                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-2">Growth Area</p>
-                             <p className="text-lg font-headline font-bold text-accent group-hover:scale-[1.02] transition-transform origin-left">Macroeconomics (42%)</p>
-                          </div>
+                          <Link href="/features/skills-map" className="contents">
+                            <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10 transition-all hover:shadow-lg hover:shadow-primary/5 group cursor-pointer">
+                               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-2">Core Competency</p>
+                               <p className="text-lg font-headline font-bold text-primary group-hover:scale-[1.02] transition-transform origin-left">Academic Writing (94%)</p>
+                            </div>
+                          </Link>
+                          <Link href="/features/skills-map" className="contents">
+                            <div className="p-5 bg-accent/5 rounded-2xl border border-accent/10 transition-all hover:shadow-lg hover:shadow-accent/5 group cursor-pointer">
+                               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent mb-2">Growth Area</p>
+                               <p className="text-lg font-headline font-bold text-accent group-hover:scale-[1.02] transition-transform origin-left">Macroeconomics (42%)</p>
+                            </div>
+                          </Link>
                        </div>
                     </div>
                     <div className="flex-1 min-h-[350px]">
@@ -243,7 +260,9 @@ export default function StudentDashboard() {
                     <h3 className="text-2xl font-headline font-bold">Comprehensive Curriculum View</h3>
                     <p className="text-muted-foreground font-medium max-w-md mx-auto">Visualize your entire academic pathway and progress across all enrolled departments.</p>
                   </div>
-                  <Button className="rounded-xl h-12 px-8 font-bold">Open Full Curriculum</Button>
+                  <Button asChild className="rounded-xl h-12 px-8 font-bold">
+                    <Link href="/course/cs101">Open Full Curriculum</Link>
+                  </Button>
                </Card>
             </TabsContent>
           </Tabs>
@@ -263,27 +282,33 @@ export default function StudentDashboard() {
                     </CardDescription>
                   </div>
                 </div>
-                <Button className="rounded-xl font-bold gap-2 h-14 px-8 shadow-xl shadow-primary/10 transition-all active:scale-95">
-                  <Zap className="size-4" /> Generate AI Artifact
+                <Button asChild className="rounded-xl font-bold gap-2 h-14 px-8 shadow-xl shadow-primary/10 transition-all active:scale-95">
+                  <Link href="/features/ai-writing-center">
+                    <Zap className="size-4" /> Generate AI Artifact
+                  </Link>
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="px-0">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-4">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="aspect-video bg-white rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-primary/40 transition-all hover:scale-[1.05] relative overflow-hidden">
-                    <div className="absolute top-3 right-3 flex gap-1.5 opacity-40">
-                      <div className="size-1.5 rounded-full bg-primary" />
-                      <div className="size-1.5 rounded-full bg-primary" />
+                  <Link key={i} href="/features/ai-writing-center" className="contents">
+                    <div className="aspect-video bg-white rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-primary/40 transition-all hover:scale-[1.05] relative overflow-hidden">
+                      <div className="absolute top-3 right-3 flex gap-1.5 opacity-40">
+                        <div className="size-1.5 rounded-full bg-primary" />
+                        <div className="size-1.5 rounded-full bg-primary" />
+                      </div>
+                      <FileText className="size-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Artifact #{i}</span>
                     </div>
-                    <FileText className="size-10 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Artifact #{i}</span>
-                  </div>
+                  </Link>
                 ))}
-                <button className="aspect-video bg-white/50 rounded-2xl border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-primary/40 hover:bg-white hover:text-primary hover:border-primary/40 transition-all group">
-                  <Plus className="size-6 mb-1 group-hover:scale-125 transition-transform" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Add manually</span>
-                </button>
+                <Link href="/features/ai-writing-center" className="contents">
+                  <button className="aspect-video bg-white/50 rounded-2xl border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-primary/40 hover:bg-white hover:text-primary hover:border-primary/40 transition-all group">
+                    <Plus className="size-6 mb-1 group-hover:scale-125 transition-transform" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Add manually</span>
+                  </button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -300,28 +325,36 @@ export default function StudentDashboard() {
                 </h3>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Timeline Prioritization</p>
               </div>
-              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted transition-colors"><Calendar className="size-4 text-muted-foreground" /></Button>
+              <Button asChild variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted transition-colors">
+                <Link href="/features/momentum-planner">
+                  <Calendar className="size-4 text-muted-foreground" />
+                </Link>
+              </Button>
             </div>
             
             <div className="space-y-5">
               {[
-                { title: "Quantum Entanglement Lab", due: "Tonight, 11:59 PM", type: "Lab", priority: "critical" },
-                { title: "Macroeconomic Reflection", due: "Tomorrow", type: "Discussion", priority: "high" },
-                { title: "Bibliography Builder Check", due: "Oct 24", type: "Research", priority: "medium" },
+                { id: "cs101", title: "Quantum Entanglement Lab", due: "Tonight, 11:59 PM", type: "Lab", priority: "critical" },
+                { id: "eco202", title: "Macroeconomic Reflection", due: "Tomorrow", type: "Discussion", priority: "high" },
+                { id: "hist105", title: "Bibliography Builder Check", due: "Oct 24", type: "Research", priority: "medium" },
               ].map((item, idx) => (
-                <div key={idx} className="group flex items-start gap-4 p-5 rounded-2xl bg-muted/20 border border-transparent hover:border-primary/10 hover:bg-white hover:shadow-xl transition-all cursor-pointer">
-                  <div className={`mt-1.5 h-3 w-3 rounded-full shrink-0 ${item.priority === 'critical' ? 'bg-destructive animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)]' : 'bg-primary/40'}`} />
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">{item.title}</p>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="text-[8px] font-bold py-0 h-4 uppercase tracking-tighter border-primary/20">{item.type}</Badge>
-                      <span className="text-[11px] font-medium text-muted-foreground">{item.due}</span>
+                <Link key={idx} href={`/course/${item.id}`} className="contents">
+                  <div className="group flex items-start gap-4 p-5 rounded-2xl bg-muted/20 border border-transparent hover:border-primary/10 hover:bg-white hover:shadow-xl transition-all cursor-pointer">
+                    <div className={`mt-1.5 h-3 w-3 rounded-full shrink-0 ${item.priority === 'critical' ? 'bg-destructive animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)]' : 'bg-primary/40'}`} />
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">{item.title}</p>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="text-[8px] font-bold py-0 h-4 uppercase tracking-tighter border-primary/20">{item.type}</Badge>
+                        <span className="text-[11px] font-medium text-muted-foreground">{item.due}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
-            <Button className="w-full h-14 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95">Launch Study Planner</Button>
+            <Button asChild className="w-full h-14 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95">
+              <Link href="/features/momentum-planner">Launch Study Planner</Link>
+            </Button>
           </div>
 
           {/* AI Feedback Feed */}
@@ -335,26 +368,28 @@ export default function StudentDashboard() {
             
             <div className="space-y-4">
               {feedbackInsights.map((insight, i) => (
-                <Card key={i} className="bg-white border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] rounded-[2rem] hover:shadow-xl transition-all duration-300 group cursor-pointer border border-transparent hover:border-primary/10 overflow-hidden">
-                  <CardContent className="p-6 md:p-8 space-y-5">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1 flex-1">
-                        <p className="text-base font-bold group-hover:text-primary transition-colors line-clamp-1">{insight.title}</p>
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">{insight.context}</p>
+                <Link key={i} href="/features/ai-writing-center" className="contents">
+                  <Card className="bg-white border-none shadow-[0_4px_20px_rgba(0,0,0,0.02)] rounded-[2rem] hover:shadow-xl transition-all duration-300 group cursor-pointer border border-transparent hover:border-primary/10 overflow-hidden">
+                    <CardContent className="p-6 md:p-8 space-y-5">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="space-y-1 flex-1">
+                          <p className="text-base font-bold group-hover:text-primary transition-colors line-clamp-1">{insight.title}</p>
+                          <p className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">{insight.context}</p>
+                        </div>
+                        <Badge className="bg-green-500/10 text-green-600 border-none font-bold text-[10px] px-3">{insight.grade}</Badge>
                       </div>
-                      <Badge className="bg-green-500/10 text-green-600 border-none font-bold text-[10px] px-3">{insight.grade}</Badge>
-                    </div>
-                    <div className="p-5 bg-muted/30 rounded-2xl relative overflow-hidden group-hover:bg-primary/5 transition-colors">
-                      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary/40 rounded-l-2xl" />
-                      <p className="text-[11px] text-muted-foreground leading-relaxed font-medium italic line-clamp-2 pl-3">
-                        "{insight.feedback}"
-                      </p>
-                    </div>
-                    <Button variant="link" size="sm" className="h-auto p-0 text-primary font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 group/btn">
-                      Detailed Breakdown <ArrowUpRight className="size-3 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                      <div className="p-5 bg-muted/30 rounded-2xl relative overflow-hidden group-hover:bg-primary/5 transition-colors">
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary/40 rounded-l-2xl" />
+                        <p className="text-[11px] text-muted-foreground leading-relaxed font-medium italic line-clamp-2 pl-3">
+                          "{insight.feedback}"
+                        </p>
+                      </div>
+                      <div className="h-auto p-0 text-primary font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 group/btn">
+                        Detailed Breakdown <ArrowUpRight className="size-3 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
@@ -363,18 +398,22 @@ export default function StudentDashboard() {
           <div className="space-y-6">
              <h4 className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.3em] px-2">Ecosystem Hubs</h4>
              <div className="grid grid-cols-2 gap-4">
-                <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
-                   <div className="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                      <Globe className="size-6 text-blue-500 group-hover:text-inherit" />
-                   </div>
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Global<br/>Success</span>
-                </button>
-                <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
-                   <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all">
-                      <Trophy className="size-6 text-green-500 group-hover:text-inherit" />
-                   </div>
-                   <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Athletic<br/>Gateway</span>
-                </button>
+                <Link href="/hubs/international-students" className="contents">
+                  <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
+                     <div className="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                        <Globe className="size-6 text-blue-500 group-hover:text-inherit" />
+                     </div>
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Global<br/>Success</span>
+                  </button>
+                </Link>
+                <Link href="/hubs/athletic-success" className="contents">
+                  <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
+                     <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all">
+                        <Trophy className="size-6 text-green-500 group-hover:text-inherit" />
+                     </div>
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Athletic<br/>Gateway</span>
+                  </button>
+                </Link>
              </div>
           </div>
         </div>
