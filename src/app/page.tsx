@@ -1,16 +1,18 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Mail, Lock, Loader2, Sparkles, ArrowRight, ShieldQuestion } from "lucide-react";
+import { Zap, Mail, Lock, Loader2, Sparkles, ShieldQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useUser, useFirestore } from "@/firebase";
 import { initiateAnonymousSignIn, initiateEmailSignIn } from "@/firebase/non-blocking-login";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EntryPage() {
@@ -21,9 +23,11 @@ export default function EntryPage() {
   const [resetEmail, setResetEmail] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   const router = useRouter();
   const auth = useAuth();
+  const db = useFirestore();
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
 
@@ -33,22 +37,46 @@ export default function EntryPage() {
       setSplashProgress((prev) => {
         if (prev >= 100) {
           clearInterval(timer);
-          setTimeout(() => setShowSplash(false), 500);
+          setTimeout(() => setShowSplash(false), 800);
           return 100;
         }
-        return prev + 2;
+        return prev + 1.5;
       });
-    }, 30);
+    }, 20);
 
     return () => clearInterval(timer);
   }, []);
 
-  // Redirect if already logged in
+  // Role-Based Redirection Logic
   useEffect(() => {
-    if (!showSplash && !isUserLoading && user) {
-      router.push("/dashboard/student");
+    async function checkRoleAndRedirect() {
+      if (!showSplash && !isUserLoading && user) {
+        setIsRedirecting(true);
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const role = userDoc.data().role?.toLowerCase() || "student";
+            // Map roles to dashboard paths
+            if (role === "instructor") {
+              router.push("/dashboard/instructor");
+            } else if (role === "admin") {
+              router.push("/dashboard/admin");
+            } else {
+              router.push("/dashboard/student");
+            }
+          } else {
+            // Default for new/unknown users
+            router.push("/dashboard/student");
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          router.push("/dashboard/student");
+        }
+      }
     }
-  }, [showSplash, isUserLoading, user, router]);
+
+    checkRoleAndRedirect();
+  }, [showSplash, isUserLoading, user, router, db]);
 
   const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,26 +110,26 @@ export default function EntryPage() {
     }
   };
 
-  if (showSplash) {
+  if (showSplash || isRedirecting) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-primary text-primary-foreground overflow-hidden">
-        <div className="relative flex flex-col items-center space-y-8 animate-in fade-in zoom-in duration-500">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-accent/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl animate-pulse" />
+        <div className="relative flex flex-col items-center space-y-8 animate-in fade-in zoom-in duration-700">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-accent/20 rounded-full -translate-x-1/2 -translate-y-1/2 blur-[100px] animate-pulse" />
           
-          <div className="bg-white/10 p-6 rounded-[2.5rem] backdrop-blur-xl border border-white/20 shadow-2xl relative z-10">
-            <Zap className="size-16 text-accent animate-bounce" />
+          <div className="bg-white/10 p-8 rounded-[3rem] backdrop-blur-2xl border border-white/20 shadow-[0_32px_64px_rgba(0,0,0,0.3)] relative z-10 group">
+            <Zap className="size-20 text-accent group-hover:scale-110 transition-transform duration-500" />
           </div>
           
-          <div className="text-center space-y-2 relative z-10">
-            <h1 className="text-4xl font-headline font-bold tracking-tight">Versora AI LMS</h1>
-            <p className="text-white/60 font-medium tracking-widest uppercase text-xs">Initializing Intelligent Learning</p>
+          <div className="text-center space-y-3 relative z-10">
+            <h1 className="text-5xl font-headline font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">Welcome to Versora</h1>
+            <p className="text-white/40 font-bold tracking-[0.4em] uppercase text-xs">Intelligent Learning Ecosystem</p>
           </div>
 
-          <div className="w-64 space-y-2 relative z-10">
+          <div className="w-72 space-y-4 relative z-10">
             <Progress value={splashProgress} className="h-1.5 bg-white/10" />
-            <div className="flex justify-between text-[10px] font-bold opacity-40 uppercase tracking-tighter">
-              <span>System Core</span>
-              <span>{splashProgress}%</span>
+            <div className="flex justify-between text-[10px] font-bold opacity-30 uppercase tracking-[0.2em]">
+              <span>{isRedirecting ? "Authenticating Identity" : "Optimizing Environment"}</span>
+              <span>{isRedirecting ? "..." : `${Math.floor(splashProgress)}%`}</span>
             </div>
           </div>
         </div>
@@ -111,43 +139,43 @@ export default function EntryPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-[120px]" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full -translate-x-1/3 translate-y-1/3 blur-[120px]" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full translate-x-1/4 -translate-y-1/4 blur-[140px]" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full -translate-x-1/4 translate-y-1/4 blur-[140px]" />
 
-      <div className="w-full max-w-md space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-4 bg-primary/10 rounded-[2rem] mb-4 shadow-sm border border-primary/5">
-            <Zap className="text-primary size-10" />
+      <div className="w-full max-w-md space-y-10 relative z-10 animate-in fade-in slide-in-from-bottom-12 duration-1000">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center p-5 bg-primary/10 rounded-[2.5rem] mb-6 shadow-sm border border-primary/5">
+            <Zap className="text-primary size-12" />
           </div>
-          <h2 className="text-4xl font-headline font-bold text-primary tracking-tight">Welcome Back</h2>
-          <p className="text-muted-foreground font-medium">Sign in to your intelligent workspace.</p>
+          <h2 className="text-5xl font-headline font-bold text-primary tracking-tight">Identity Access</h2>
+          <p className="text-muted-foreground font-medium text-lg">Sign in to your intelligent workspace.</p>
         </div>
 
-        <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white/90 backdrop-blur-md rounded-[2.5rem] overflow-hidden">
-          <CardHeader className="space-y-1 pb-6 px-8 pt-8">
-            <CardTitle className="text-2xl font-headline font-bold">Sign In</CardTitle>
-            <CardDescription className="text-base">Access your courses and AI tools</CardDescription>
+        <Card className="border-none shadow-[0_40px_80px_rgba(0,0,0,0.08)] bg-white/80 backdrop-blur-2xl rounded-[3rem] overflow-hidden border border-white/20">
+          <CardHeader className="space-y-2 pb-8 px-10 pt-10">
+            <CardTitle className="text-3xl font-headline font-bold">Secure Entry</CardTitle>
+            <CardDescription className="text-base font-medium">Please provide your institutional credentials.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6 px-8">
-            <form onSubmit={handleEmailLogin} className="space-y-4">
+          <CardContent className="space-y-8 px-10">
+            <form onSubmit={handleEmailLogin} className="space-y-6">
               <div className="space-y-4">
-                <div className="relative">
-                  <Mail className="absolute left-4 top-3.5 size-5 text-muted-foreground/60" />
+                <div className="relative group">
+                  <Mail className="absolute left-5 top-4.5 size-5 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                   <Input 
                     type="email" 
                     placeholder="Email address" 
-                    className="pl-12 h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 text-base"
+                    className="h-16 pl-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 text-lg font-medium transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-3.5 size-5 text-muted-foreground/60" />
+                <div className="relative group">
+                  <Lock className="absolute left-5 top-4.5 size-5 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                   <Input 
                     type="password" 
                     placeholder="Password" 
-                    className="pl-12 h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 text-base"
+                    className="h-16 pl-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 text-lg font-medium transition-all"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -158,32 +186,32 @@ export default function EntryPage() {
               <div className="flex justify-end">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button type="button" className="text-sm font-bold text-primary hover:text-accent transition-colors flex items-center gap-1.5">
-                      <ShieldQuestion className="size-4" /> Forgot password?
+                    <button type="button" className="text-sm font-bold text-primary hover:text-accent transition-colors flex items-center gap-2">
+                      <ShieldQuestion className="size-4" /> Recover Access
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="rounded-[2rem]">
-                    <DialogHeader>
-                      <DialogTitle className="font-headline text-xl">Reset Password</DialogTitle>
-                      <DialogDescription>
-                        Enter your email address and we'll send you a link to reset your password.
+                  <DialogContent className="rounded-[2.5rem] p-10">
+                    <DialogHeader className="space-y-3">
+                      <DialogTitle className="font-headline text-3xl font-bold">Credential Recovery</DialogTitle>
+                      <DialogDescription className="text-base font-medium">
+                        Enter your institutional email to receive an identity verification link.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4">
+                    <div className="py-8">
                       <Input
                         placeholder="your@email.com"
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.target.value)}
-                        className="h-12 rounded-xl"
+                        className="h-14 rounded-2xl bg-muted/30 border-none px-6"
                       />
                     </div>
                     <DialogFooter>
                       <Button 
                         onClick={handleResetPassword} 
                         disabled={isResetting || !resetEmail}
-                        className="rounded-xl w-full"
+                        className="rounded-2xl w-full h-14 text-lg font-bold shadow-lg shadow-primary/20"
                       >
-                        {isResetting ? <Loader2 className="size-4 animate-spin" /> : "Send Reset Link"}
+                        {isResetting ? <Loader2 className="size-6 animate-spin" /> : "Request Reset Link"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -192,42 +220,42 @@ export default function EntryPage() {
 
               <Button 
                 type="submit" 
-                className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-lg shadow-lg shadow-primary/20"
+                className="w-full h-16 rounded-[1.5rem] bg-primary hover:bg-primary/90 text-white font-bold text-xl shadow-2xl shadow-primary/20 transition-all active:scale-[0.98]"
                 disabled={isLoggingIn}
               >
-                {isLoggingIn ? <Loader2 className="size-5 animate-spin" /> : "Sign In"}
+                {isLoggingIn ? <Loader2 className="size-6 animate-spin" /> : "Initialize Workspace"}
               </Button>
             </form>
 
-            <div className="relative py-2">
+            <div className="relative py-4">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-muted" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white/90 px-3 text-muted-foreground/60 font-bold tracking-widest">Or</span>
+              <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-[0.3em]">
+                <span className="bg-white/80 backdrop-blur-md px-6 text-muted-foreground/40">Continuum</span>
               </div>
             </div>
 
             <Button 
               variant="outline" 
-              className="w-full h-14 rounded-2xl border-2 border-primary/5 hover:bg-primary/5 font-bold text-base transition-all"
+              className="w-full h-16 rounded-[1.5rem] border-2 border-primary/5 hover:bg-primary/5 font-bold text-lg transition-all group"
               onClick={handleGuestLogin}
               disabled={isLoggingIn}
             >
-              <Sparkles className="size-5 mr-2 text-accent" /> Try as Guest
+              <Sparkles className="size-5 mr-3 text-accent group-hover:rotate-12 transition-transform" /> Explore as Observer
             </Button>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4 border-t bg-muted/10 p-8">
-            <p className="text-center text-xs text-muted-foreground font-medium leading-relaxed">
-              By signing in, you agree to Versora's <span className="text-primary font-bold cursor-pointer hover:underline">Terms</span> and <span className="text-primary font-bold cursor-pointer hover:underline">Privacy Policy</span>.
+          <CardFooter className="flex flex-col space-y-4 border-t border-muted/20 bg-muted/5 p-10">
+            <p className="text-center text-xs text-muted-foreground font-medium leading-relaxed max-w-[280px]">
+              By proceeding, you acknowledge the <span className="text-primary font-bold cursor-pointer hover:underline">Nexus Protocols</span> and <span className="text-primary font-bold cursor-pointer hover:underline">Data Ethics</span> policies.
             </p>
           </CardFooter>
         </Card>
 
-        <div className="flex justify-center gap-10 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40">
-          <span>Build 1.4.2</span>
-          <span>Intelligent OS</span>
-          <span>© 2024 Versora</span>
+        <div className="flex justify-center gap-12 text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground/30">
+          <span>v2.1.0-STABLE</span>
+          <span>NEURAL-OS</span>
+          <span>© 2024 VERSORA</span>
         </div>
       </div>
     </div>
