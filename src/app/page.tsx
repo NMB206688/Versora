@@ -43,7 +43,7 @@ export default function EntryPage() {
           setTimeout(() => setShowSplash(false), 800);
           return 100;
         }
-        return prev + 2.5; // Faster splash for better UX
+        return prev + 2.5;
       });
     }, 20);
 
@@ -55,6 +55,12 @@ export default function EntryPage() {
     async function checkRoleAndRedirect() {
       if (!showSplash && !isUserLoading && user) {
         setIsRedirecting(true);
+
+        if (user.isAnonymous) {
+          router.push("/dashboard/observatory");
+          return;
+        }
+
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
@@ -136,7 +142,7 @@ export default function EntryPage() {
           <div className="w-64 space-y-4 relative z-10">
             <Progress value={splashProgress} className="h-1 bg-white/10" />
             <div className="flex justify-between text-[9px] font-bold opacity-40 uppercase tracking-[0.2em]">
-              <span>{isRedirecting ? "Connecting" : "Loading"}</span>
+              <span>{isRedirecting ? "Syncing Identity" : "Initializing"}</span>
               <span>{Math.floor(splashProgress)}%</span>
             </div>
           </div>
@@ -147,7 +153,6 @@ export default function EntryPage() {
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Dynamic Backgrounds */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full translate-x-1/4 -translate-y-1/4 blur-[120px]" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full -translate-x-1/4 translate-y-1/4 blur-[120px]" />
 

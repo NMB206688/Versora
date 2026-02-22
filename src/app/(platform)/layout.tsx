@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Search, User, Loader2, LogOut, Settings, UserCircle } from "lucide-react";
+import { Bell, Search, User, Loader2, LogOut, Settings, UserCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useFirestore, useAuth } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -19,18 +19,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
-  const [role, setRole] = useState<"student" | "instructor" | "admin" | null>(null);
+  const [role, setRole] = useState<"student" | "instructor" | "admin" | "observer" | null>(null);
   const [isLoadingRole, setIsLoadingRole] = useState(true);
 
   useEffect(() => {
     async function fetchRole() {
       if (user) {
+        if (user.isAnonymous) {
+          setRole("observer");
+          setIsLoadingRole(false);
+          return;
+        }
+
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
@@ -81,11 +88,16 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex items-center gap-4">
             <SidebarTrigger className="-ml-1 h-9 w-9 rounded-xl hover:bg-primary/5" />
             <Separator orientation="vertical" className="mr-2 h-6" />
-            <div className="hidden md:flex items-center relative w-72">
+            {role === "observer" && (
+              <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 px-4 py-1.5 rounded-full font-bold uppercase tracking-widest text-[10px] hidden sm:flex items-center gap-2">
+                <Sparkles className="size-3 animate-pulse" /> Observer Preview
+              </Badge>
+            )}
+            <div className="hidden lg:flex items-center relative w-72">
               <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-muted-foreground/40" />
               <input
                 type="search"
-                placeholder="Search resources, knowledge, students..."
+                placeholder="Search resources, knowledge..."
                 className="pl-10 pr-4 py-2 w-full text-sm bg-muted/30 border-none rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
               />
             </div>
@@ -106,7 +118,9 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
               <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-primary/10">
                 <DropdownMenuLabel className="font-headline font-bold px-4 pt-4 pb-2">
                   My Identity
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{user?.email}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
+                    {role === "observer" ? "Observer Mode" : user?.email}
+                  </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="mx-2 bg-muted" />
                 <DropdownMenuItem className="rounded-xl px-4 py-3 cursor-pointer group">

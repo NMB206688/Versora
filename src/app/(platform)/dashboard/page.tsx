@@ -19,10 +19,18 @@ export default function DashboardRedirect() {
   useEffect(() => {
     async function redirect() {
       if (!isUserLoading && user) {
+        // If the user is anonymous (Observer Mode)
+        if (user.isAnonymous) {
+          router.push("/dashboard/observatory");
+          return;
+        }
+
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
-            const role = (userDoc.data().role || "student").toLowerCase();
+            const roleData = userDoc.data().role;
+            const role = (Array.isArray(roleData) ? roleData[0] : roleData)?.toLowerCase() || "student";
+            
             if (role === "instructor") {
               router.push("/dashboard/instructor");
             } else if (role === "admin") {
@@ -47,10 +55,15 @@ export default function DashboardRedirect() {
   return (
     <div className="h-screen w-full flex items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="size-10 animate-spin text-primary" />
-        <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest animate-pulse">
-          Routing to Workspace...
-        </p>
+        <div className="p-4 bg-white rounded-3xl shadow-xl animate-bounce">
+          <Loader2 className="size-10 animate-spin text-primary" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-sm font-bold text-primary uppercase tracking-[0.3em] animate-pulse">
+            Nexus Routing
+          </p>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest opacity-40">Verifying session integrity...</p>
+        </div>
       </div>
     </div>
   );

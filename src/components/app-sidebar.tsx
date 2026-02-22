@@ -9,13 +9,14 @@ import {
   Search, 
   Users, 
   Settings, 
-  HelpCircle, 
   GraduationCap,
   Sparkles,
   Zap,
   Briefcase,
   Globe,
-  LogOut
+  LogOut,
+  Layout,
+  Eye
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -35,7 +36,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-export function AppSidebar({ role = "student" }: { role?: "student" | "instructor" | "admin" }) {
+export function AppSidebar({ role = "student" }: { role?: "student" | "instructor" | "admin" | "observer" }) {
   const pathname = usePathname();
   const auth = useAuth();
   const router = useRouter();
@@ -68,6 +69,12 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
       { name: "System Health", href: "/dashboard/admin", icon: Zap },
       { name: "Program Innovation", href: "/admin/innovation", icon: Sparkles },
       { name: "User Management", href: "/admin/users", icon: Users },
+    ],
+    observer: [
+      { name: "Observatory Hub", href: "/dashboard/observatory", icon: Eye },
+      { name: "Student Preview", href: "/dashboard/student", icon: GraduationCap },
+      { name: "Instructor Preview", href: "/dashboard/instructor", icon: Users },
+      { name: "Admin Preview", href: "/dashboard/admin", icon: Zap },
     ]
   };
 
@@ -109,27 +116,29 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
         
         <SidebarSeparator />
         
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50">Ecosystem</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Global Scholars">
-                <Link href="/hubs/international-students">
-                  <Globe className="size-4" />
-                  <span>Global Scholars</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Career Gateway">
-                <Link href="/features/career-gateway">
-                  <Briefcase className="size-4" />
-                  <span>Career Gateway</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+        {role !== "observer" && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-sidebar-foreground/50">Ecosystem</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Global Scholars">
+                  <Link href="/hubs/international-students">
+                    <Globe className="size-4" />
+                    <span>Global Scholars</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Career Gateway">
+                  <Link href="/features/career-gateway">
+                    <Briefcase className="size-4" />
+                    <span>Career Gateway</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border/50">
         <SidebarMenu>
