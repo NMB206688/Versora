@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -16,7 +15,9 @@ import {
   Globe,
   LogOut,
   Layout,
-  Eye
+  Eye,
+  TrendingUp,
+  LineChart
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -53,7 +54,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
   const navigation = {
     student: [
       { name: "Dashboard", href: "/dashboard/student", icon: LayoutDashboard },
-      { name: "My Courses", href: "/dashboard/student#courses", icon: BookOpen },
+      { name: "My Courses", href: "/course/cs101", icon: BookOpen }, // Links to a sample course studio for now
       { name: "AI Writing Center", href: "/features/ai-writing-center", icon: PenTool },
       { name: "AI Research Hub", href: "/features/ai-research-hub", icon: Search },
       { name: "Skills Map", href: "/features/skills-map", icon: Zap },
@@ -67,8 +68,8 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
     ],
     admin: [
       { name: "System Health", href: "/dashboard/admin", icon: Zap },
-      { name: "Program Innovation", href: "/admin/innovation", icon: Sparkles },
-      { name: "User Management", href: "/admin/users", icon: Users },
+      { name: "Program Innovation", href: "/dashboard/admin", icon: Sparkles },
+      { name: "User Management", href: "/dashboard/admin", icon: Users },
     ],
     observer: [
       { name: "Observatory Hub", href: "/dashboard/observatory", icon: Eye },
@@ -102,7 +103,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
                   asChild
                   isActive={pathname === item.href}
                   tooltip={item.name}
-                  className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors"
+                  className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground transition-colors h-10 px-4"
                 >
                   <Link href={item.href}>
                     <item.icon className="size-4" />
@@ -121,7 +122,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
             <SidebarGroupLabel className="text-sidebar-foreground/50">Ecosystem</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Global Scholars">
+                <SidebarMenuButton asChild tooltip="Global Scholars" isActive={pathname === "/hubs/international-students"}>
                   <Link href="/hubs/international-students">
                     <Globe className="size-4" />
                     <span>Global Scholars</span>
@@ -129,7 +130,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Career Gateway">
+                <SidebarMenuButton asChild tooltip="Career Gateway" isActive={pathname === "/features/career-gateway"}>
                   <Link href="/features/career-gateway">
                     <Briefcase className="size-4" />
                     <span>Career Gateway</span>
@@ -143,7 +144,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
       <SidebarFooter className="border-t border-sidebar-border/50">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Settings">
+            <SidebarMenuButton asChild tooltip="Settings" isActive={pathname === "/settings"}>
               <Link href="/settings">
                 <Settings className="size-4" />
                 <span>Settings</span>
