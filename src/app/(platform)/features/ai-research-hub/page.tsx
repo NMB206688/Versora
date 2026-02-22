@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -6,8 +5,9 @@ import { aiResearchAndCitationGenerator, type AiResearchAndCitationGeneratorOutp
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2, Book, Copy, ExternalLink, Sparkles } from "lucide-react";
+import { Search, Loader2, Book, Copy, ExternalLink, Sparkles, Database, BookmarkPlus, GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 export default function AiResearchHub() {
   const [query, setQuery] = useState("");
@@ -43,87 +43,120 @@ export default function AiResearchHub() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-primary font-headline font-bold uppercase tracking-widest text-sm">
-          <Sparkles className="size-4" /> AI Research & Citation Hub
+    <div className="min-h-full bg-muted/5">
+      <div className="p-8 max-w-6xl mx-auto space-y-12">
+        {/* Header Section */}
+        <div className="space-y-6 text-center lg:text-left max-w-3xl">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary font-headline font-bold uppercase tracking-[0.2em] text-xs px-4 py-2 rounded-full border border-primary/10">
+            <Database className="size-4" /> Research Intelligence Layer
+          </div>
+          <h2 className="text-5xl font-headline font-bold text-primary tracking-tight leading-[1.1]">Intelligent Discovery Hub</h2>
+          <p className="text-xl text-muted-foreground font-medium leading-relaxed">
+            Query millions of academic sources using natural language. Get instant source verification and perfectly formatted APA citations.
+          </p>
         </div>
-        <h2 className="text-4xl font-headline font-bold text-primary">Intelligent Discovery</h2>
-        <p className="text-lg text-muted-foreground">
-          Ask for academic sources in natural language. We'll find relevant materials and generate perfect APA citations.
-        </p>
+
+        {/* Search Bar Area */}
+        <div className="relative group max-w-4xl">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-[2.5rem] blur-xl opacity-25 group-focus-within:opacity-50 transition-opacity" />
+          <form onSubmit={handleSearch} className="relative flex flex-col md:flex-row gap-4 p-4 bg-white rounded-[2.5rem] shadow-2xl border border-primary/5">
+            <div className="flex-1 relative">
+              <Search className="absolute left-5 top-5 h-6 w-6 text-muted-foreground/40" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Describe your research topic in plain English..."
+                className="h-16 pl-14 pr-4 text-xl rounded-2xl border-none bg-transparent focus-visible:ring-0 placeholder:text-muted-foreground/30 font-medium"
+              />
+            </div>
+            <Button 
+              disabled={loading || !query} 
+              type="submit" 
+              className="h-16 rounded-[1.5rem] px-12 bg-primary hover:bg-primary/90 text-lg font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
+            >
+              {loading ? <Loader2 className="size-6 animate-spin" /> : (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="size-5" /> Start Research
+                </span>
+              )}
+            </Button>
+          </form>
+        </div>
+
+        {results ? (
+          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="flex items-center justify-between px-4">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-headline font-bold">Suggested Academic Sources</h3>
+                <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                  <GraduationCap className="size-4 text-primary" /> Verified through Versora Academic Index
+                </p>
+              </div>
+              <Badge variant="outline" className="rounded-xl px-4 py-2 border-primary/10 bg-white font-bold text-primary">
+                {results.sources.length} Peer Reviewed Results
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-6">
+              {results.sources.map((source, idx) => (
+                <Card key={idx} className="group hover:shadow-2xl hover:border-primary/20 transition-all duration-500 shadow-sm border-none bg-white rounded-[2.5rem] overflow-hidden">
+                  <div className="p-10 flex flex-col lg:flex-row gap-10">
+                    <div className="flex-1 space-y-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                           <Badge className="bg-primary/10 text-primary border-none text-[10px] font-bold uppercase tracking-widest">{source.year}</Badge>
+                           <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{source.publication}</span>
+                        </div>
+                        <CardTitle className="text-2xl font-headline leading-tight font-bold group-hover:text-primary transition-colors">
+                          {source.title}
+                        </CardTitle>
+                        <p className="text-muted-foreground font-medium">{source.authors.join(", ")}</p>
+                      </div>
+
+                      <div className="p-6 bg-muted/20 rounded-[1.5rem] text-[13px] font-mono leading-relaxed text-muted-foreground/80 border border-transparent group-hover:border-primary/10 group-hover:bg-primary/5 transition-all relative">
+                        <div className="pr-12">
+                          {source.citation}
+                        </div>
+                        <Button 
+                          onClick={() => copyCitation(source.citation)}
+                          variant="secondary" 
+                          size="icon" 
+                          className="absolute right-4 top-4 h-10 w-10 rounded-xl shadow-sm hover:scale-105 transition-all"
+                          title="Copy Citation"
+                        >
+                          <Copy className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="lg:w-48 flex flex-col gap-3 justify-center">
+                      <Button className="w-full h-12 rounded-xl font-bold gap-2">
+                        <Book className="size-4" /> Full Text
+                      </Button>
+                      <Button variant="outline" className="w-full h-12 rounded-xl font-bold gap-2 border-primary/10">
+                        <BookmarkPlus className="size-4" /> Save Source
+                      </Button>
+                      <Button variant="ghost" className="w-full h-12 rounded-xl font-bold gap-2 text-muted-foreground hover:text-primary">
+                        <ExternalLink className="size-4" /> Repository
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : !loading && (
+          <div className="flex flex-col items-center justify-center py-32 space-y-6 text-center px-4">
+            <div className="size-32 bg-primary/5 rounded-[3rem] flex items-center justify-center animate-pulse">
+              <Book className="size-16 text-primary/20" />
+            </div>
+            <div className="space-y-2">
+              <p className="font-headline font-bold text-2xl text-muted-foreground/50">Your bibliography starts here</p>
+              <p className="text-muted-foreground/40 font-medium max-w-md">Search for journals, papers, or specific topics to begin your intelligent discovery.</p>
+            </div>
+          </div>
+        )}
       </div>
-
-      <form onSubmit={handleSearch} className="relative group">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-          <Search className="h-6 w-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
-        </div>
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="e.g., 'recent studies on renewable energy transition in developing nations'"
-          className="h-16 pl-14 pr-32 text-lg rounded-2xl shadow-lg border-primary/20 focus-visible:ring-primary/40"
-        />
-        <div className="absolute inset-y-2 right-2 flex items-center">
-          <Button 
-            disabled={loading || !query} 
-            type="submit" 
-            className="h-full rounded-xl px-8 bg-primary hover:bg-primary/90"
-          >
-            {loading ? <Loader2 className="size-4 animate-spin" /> : "Search Hub"}
-          </Button>
-        </div>
-      </form>
-
-      {results && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-headline font-bold">Suggested Academic Sources</h3>
-            <span className="text-sm text-muted-foreground">{results.sources.length} sources found</span>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-4">
-            {results.sources.map((source, idx) => (
-              <Card key={idx} className="hover:border-primary/30 transition-all shadow-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-headline leading-tight">{source.title}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {source.authors.join(", ")} ({source.year}) • {source.publication}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 bg-secondary/30 rounded-lg text-xs font-mono text-muted-foreground border border-primary/10 relative group/citation">
-                    {source.citation}
-                    <Button 
-                      onClick={() => copyCitation(source.citation)}
-                      variant="ghost" 
-                      size="icon" 
-                      className="absolute right-1 top-1 h-8 w-8 opacity-0 group-hover/citation:opacity-100 transition-opacity"
-                    >
-                      <Copy className="size-4" />
-                    </Button>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="text-xs h-8">
-                      <Book className="size-3 mr-1" /> Full Text
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-xs h-8">
-                      <ExternalLink className="size-3 mr-1" /> View Repository
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!results && !loading && (
-        <div className="flex flex-col items-center justify-center py-20 opacity-20">
-          <Book className="size-20 mb-4" />
-          <p className="font-headline font-bold text-xl">Your bibliography starts here</p>
-        </div>
-      )}
     </div>
   );
 }

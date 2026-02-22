@@ -1,3 +1,4 @@
+"use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,9 @@ import {
   ChevronRight,
   Sparkles,
   Zap,
-  BookOpen
+  BookOpen,
+  Trophy,
+  ArrowUpRight
 } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -20,9 +23,9 @@ export default function StudentDashboard() {
   const hero = PlaceHolderImages.find(img => img.id === "student-dashboard-hero");
 
   const courses = [
-    { title: "Introduction to Quantum Physics", progress: 65, instructor: "Dr. Aris Thorne", color: "bg-blue-500" },
-    { title: "Global Economics 101", progress: 42, instructor: "Prof. Sarah Miller", color: "bg-purple-500" },
-    { title: "Advanced Data Structures", progress: 88, instructor: "Elena Rodriguez", color: "bg-accent" },
+    { title: "Introduction to Quantum Physics", progress: 65, instructor: "Dr. Aris Thorne", category: "Science" },
+    { title: "Global Economics 101", progress: 42, instructor: "Prof. Sarah Miller", category: "Finance" },
+    { title: "Advanced Data Structures", progress: 88, instructor: "Elena Rodriguez", category: "CS" },
   ];
 
   const upcoming = [
@@ -32,60 +35,71 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="p-6 space-y-8 max-w-7xl mx-auto">
+    <div className="p-8 space-y-10 max-w-7xl mx-auto">
       {/* Welcome Hero */}
-      <div className="relative overflow-hidden rounded-3xl border bg-primary text-primary-foreground p-8 min-h-[250px] flex flex-col justify-end">
+      <div className="relative overflow-hidden rounded-[2.5rem] border-none bg-primary text-primary-foreground p-10 min-h-[320px] flex flex-col justify-end shadow-2xl">
         {hero && (
           <Image 
             src={hero.imageUrl} 
             alt={hero.description}
             fill
-            className="object-cover opacity-20 pointer-events-none"
+            className="object-cover opacity-30 pointer-events-none scale-105"
             priority
             data-ai-hint={hero.imageHint}
           />
         )}
-        <div className="relative z-10 space-y-4 max-w-2xl">
-          <Badge className="bg-accent hover:bg-accent/80 text-white font-headline border-none px-3 py-1">Welcome back, Alex</Badge>
-          <h2 className="text-4xl font-headline font-bold leading-tight">Your next leap starts here.</h2>
-          <div className="flex flex-wrap gap-4">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90">
-              <Play className="size-4 mr-2" /> Continue Learning
+        <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/40 to-transparent" />
+        <div className="relative z-10 space-y-6 max-w-3xl">
+          <Badge className="bg-accent/90 hover:bg-accent text-white font-headline border-none px-4 py-1.5 text-xs tracking-wider uppercase">
+            Student Account: Alex Johnson
+          </Badge>
+          <h2 className="text-5xl font-headline font-bold leading-[1.1] tracking-tight">Your next academic leap <br/> starts here.</h2>
+          <div className="flex flex-wrap gap-4 pt-2">
+            <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-8 font-bold shadow-xl shadow-black/10">
+              <Play className="size-5 mr-2" /> Resume Learning
             </Button>
-            <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 text-white">
-              View Schedule
+            <Button size="lg" variant="outline" className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-2xl h-14 px-8 backdrop-blur-sm border-2">
+              My Schedule
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left Column: Courses and Portfolio */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-8 space-y-10">
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-headline font-bold flex items-center gap-2">
-                <BookOpen className="text-primary size-6" /> My Active Courses
-              </h3>
-              <Button variant="ghost" className="text-primary font-bold">View all</Button>
+            <div className="flex items-center justify-between mb-8">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-headline font-bold flex items-center gap-3">
+                  <BookOpen className="text-primary size-7" /> Active Enrollments
+                </h3>
+                <p className="text-muted-foreground text-sm font-medium">Continue where you left off in your 3 active courses.</p>
+              </div>
+              <Button variant="outline" className="rounded-xl font-bold border-primary/10 hover:bg-primary/5">View Full Catalog</Button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {courses.map((course) => (
-                <Card key={course.title} className="hover:shadow-lg transition-shadow border-none shadow-md bg-white">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg leading-tight font-headline">{course.title}</CardTitle>
-                    <CardDescription>{course.instructor}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold text-muted-foreground uppercase">
-                        <span>Progress</span>
-                        <span>{course.progress}%</span>
-                      </div>
-                      <Progress value={course.progress} className="h-2" />
+                <Card key={course.title} className="hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-none shadow-[0_10px_40px_rgba(0,0,0,0.04)] bg-white rounded-[2rem] overflow-hidden group">
+                  <div className="h-2 w-full bg-primary/10 group-hover:bg-primary transition-colors" />
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-between items-start mb-2">
+                       <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-widest">{course.category}</Badge>
+                       <Trophy className="size-4 text-muted-foreground/30" />
                     </div>
-                    <Button variant="secondary" size="sm" className="w-full group">
-                      Resume <ChevronRight className="size-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                    <CardTitle className="text-xl leading-tight font-headline font-bold group-hover:text-primary transition-colors">{course.title}</CardTitle>
+                    <CardDescription className="font-medium">{course.instructor}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6 pb-8">
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-bold text-muted-foreground uppercase tracking-tighter">
+                        <span>Course Completion</span>
+                        <span className="text-primary">{course.progress}%</span>
+                      </div>
+                      <Progress value={course.progress} className="h-2.5 bg-primary/5" />
+                    </div>
+                    <Button variant="secondary" className="w-full h-12 rounded-xl group font-bold bg-muted/50 hover:bg-primary hover:text-white transition-all">
+                      Open Classroom <ArrowUpRight className="size-4 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                     </Button>
                   </CardContent>
                 </Card>
@@ -93,26 +107,31 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          <Card className="bg-secondary/50 border-dashed border-2 border-primary/20">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Sparkles className="text-accent size-5" />
-                <CardTitle className="font-headline">Evidence-of-Learning Portfolio</CardTitle>
+          <Card className="bg-secondary/30 border-dashed border-2 border-primary/10 rounded-[2.5rem] shadow-none p-4">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-accent/10 rounded-2xl">
+                  <Sparkles className="text-accent size-6" />
+                </div>
+                <div>
+                  <CardTitle className="font-headline text-xl font-bold">Evidence-of-Learning Portfolio</CardTitle>
+                  <CardDescription className="font-medium">
+                    Showcase your academic achievements to instructors and peers.
+                  </CardDescription>
+                </div>
               </div>
-              <CardDescription>
-                You have 4 new items ready to be added to your showcase.
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4 overflow-x-auto pb-4">
+              <div className="flex gap-4 overflow-x-auto pb-4 pt-4 px-1">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="flex-shrink-0 w-32 h-20 bg-white rounded-lg border flex items-center justify-center text-primary/30">
-                    <FileText className="size-8" />
+                  <div key={i} className="flex-shrink-0 w-44 h-28 bg-white rounded-2xl border shadow-sm flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-primary/20 transition-all">
+                    <FileText className="size-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest">Artifact #{i}</span>
                   </div>
                 ))}
-                <button className="flex-shrink-0 w-32 h-20 bg-primary/5 rounded-lg border-2 border-dashed border-primary/30 flex flex-col items-center justify-center text-primary/60 hover:bg-primary/10 transition-colors">
-                  <Zap className="size-4 mb-1" />
-                  <span className="text-[10px] font-bold uppercase">Add New</span>
+                <button className="flex-shrink-0 w-44 h-28 bg-primary/5 rounded-2xl border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-primary/60 hover:bg-primary/10 hover:scale-95 transition-all">
+                  <Zap className="size-5 mb-1" />
+                  <span className="text-[11px] font-bold uppercase tracking-widest">Add Artifact</span>
                 </button>
               </div>
             </CardContent>
@@ -120,47 +139,54 @@ export default function StudentDashboard() {
         </div>
 
         {/* Right Column: Deadlines and Feedback */}
-        <div className="space-y-8">
-          <div>
-            <h3 className="text-xl font-headline font-bold mb-6 flex items-center gap-2">
-              <Clock className="text-primary size-5" /> Upcoming Deadlines
-            </h3>
-            <div className="space-y-4">
+        <div className="lg:col-span-4 space-y-10">
+          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border space-y-8">
+            <div className="space-y-1">
+              <h3 className="text-xl font-headline font-bold flex items-center gap-3">
+                <Clock className="text-primary size-5" /> Critical Deadlines
+              </h3>
+              <p className="text-xs text-muted-foreground font-medium">Prioritize these upcoming tasks.</p>
+            </div>
+            <div className="space-y-5">
               {upcoming.map((item) => (
-                <div key={item.title} className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-transparent hover:border-primary/20 hover:shadow-sm transition-all">
-                  <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${item.urgency === 'destructive' ? 'bg-destructive animate-pulse' : 'bg-primary/40'}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate">{item.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-[10px] py-0 h-4">{item.type}</Badge>
-                      <span className="text-xs text-muted-foreground">{item.due}</span>
+                <div key={item.title} className="group flex items-start gap-4 p-5 rounded-2xl bg-muted/20 border border-transparent hover:border-primary/10 hover:bg-white hover:shadow-lg transition-all cursor-pointer">
+                  <div className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${item.urgency === 'destructive' ? 'bg-destructive animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-primary/40'}`} />
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">{item.title}</p>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="text-[9px] font-bold py-0 h-4 uppercase tracking-widest border-primary/20">{item.type}</Badge>
+                      <span className="text-[11px] font-medium text-muted-foreground">{item.due}</span>
                     </div>
                   </div>
                 </div>
               ))}
+              <Button variant="ghost" className="w-full text-xs font-bold text-primary hover:bg-primary/5 rounded-xl">View Calendar</Button>
             </div>
           </div>
 
-          <div>
-            <h3 className="text-xl font-headline font-bold mb-6 flex items-center gap-2">
-              <MessageSquare className="text-primary size-5" /> Recent Feedback
+          <div className="space-y-6">
+            <h3 className="text-xl font-headline font-bold flex items-center gap-3 px-2">
+              <MessageSquare className="text-primary size-5" /> AI Feedback Insights
             </h3>
             <div className="space-y-4">
               {[1, 2].map((i) => (
-                <Card key={i} className="bg-white border-none shadow-sm">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold">Essay: The Industrial Revolution</p>
-                        <p className="text-xs text-muted-foreground">Global History 101</p>
+                <Card key={i} className="bg-white border-none shadow-sm rounded-[1.5rem] hover:shadow-md transition-all group cursor-pointer">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 flex-1">
+                        <p className="text-sm font-bold group-hover:text-primary transition-colors">Essay: The Industrial Revolution</p>
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Global History 101</p>
                       </div>
-                      <Badge className="bg-green-500 text-white border-none">94/100</Badge>
+                      <Badge className="bg-green-500/10 text-green-600 border-none font-bold">94/100</Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2 italic">
-                      "Excellent use of primary sources. Your argumentation in the third paragraph was particularly strong..."
-                    </p>
+                    <div className="p-3 bg-secondary/20 rounded-xl relative">
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-xl" />
+                      <p className="text-xs text-muted-foreground leading-relaxed italic line-clamp-2 pl-2">
+                        "Excellent use of primary sources. Your argumentation in the third paragraph was particularly strong and showed deep analysis..."
+                      </p>
+                    </div>
                     <Button variant="link" size="sm" className="h-auto p-0 text-primary font-bold text-xs">
-                      Read more feedback
+                      Analyze detailed breakdown
                     </Button>
                   </CardContent>
                 </Card>
