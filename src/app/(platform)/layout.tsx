@@ -34,8 +34,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   // Maintenance mode real-time listener
   useEffect(() => {
-    // We only listen for the real DB state. 
-    // Manual simulation for "Observer" role is handled in the Admin page toggle.
+    // Only set up the listener if the user is authenticated. 
+    // This prevents "Missing or insufficient permissions" errors caused by 
+    // requesting data before the Firebase Auth token is attached.
+    if (!user) return;
+
     const maintenanceDocRef = doc(db, "systemSettings", "maintenance_mode");
     
     const unsub = onSnapshot(
@@ -62,7 +65,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       }
     );
     return () => unsub();
-  }, [db, role, router]);
+  }, [db, user, role, router]);
 
   useEffect(() => {
     async function fetchRole() {
