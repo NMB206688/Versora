@@ -24,7 +24,8 @@ import {
   Search,
   Plus,
   Globe,
-  Layout
+  Layout,
+  Briefcase
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,7 +43,6 @@ export default function StudentDashboard() {
   const hero = PlaceHolderImages.find(img => img.id === "student-dashboard-hero");
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Mock data for Skills Map (derived from StudentSkillProficiency)
   const skillData = [
     { subject: 'Critical Thinking', A: 85, fullMark: 100 },
     { subject: 'Quantum Physics', A: 65, fullMark: 100 },
@@ -52,7 +52,6 @@ export default function StudentDashboard() {
     { subject: 'Collaboration', A: 78, fullMark: 100 },
   ];
 
-  // Mock data for Momentum Planner (StudentGoal)
   const goals = [
     { id: 1, title: "Master Schrödinger's Equation", dueDate: "Oct 30", progress: 70, type: "Academic" },
     { id: 2, title: "Submit Final Research Paper", dueDate: "Nov 15", progress: 25, type: "Project" },
@@ -72,7 +71,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="p-4 md:p-8 space-y-10 max-w-7xl mx-auto bg-muted/5 min-h-full">
-      {/* Welcome Hero - Dynamic and Immersive */}
+      {/* Welcome Hero */}
       <div className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] border-none bg-primary text-primary-foreground p-8 md:p-12 min-h-[300px] flex flex-col justify-end shadow-2xl">
         {hero && (
           <Image 
@@ -111,9 +110,7 @@ export default function StudentDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10">
-        {/* Left Column: Learning Progress and Goals */}
         <div className="lg:col-span-8 space-y-10">
-          
           <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
             <div className="flex items-center justify-between mb-6 overflow-x-auto">
               <TabsList className="bg-white/50 border p-1 rounded-2xl h-14 shrink-0">
@@ -129,7 +126,6 @@ export default function StudentDashboard() {
             </div>
 
             <TabsContent value="overview" className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {/* Active Enrollments Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {courses.map((course) => (
                   <Card key={course.title} className="hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border-none shadow-[0_10px_40px_rgba(0,0,0,0.03)] bg-white rounded-[2rem] overflow-hidden group cursor-pointer">
@@ -161,7 +157,6 @@ export default function StudentDashboard() {
                   </Card>
                 ))}
                 
-                {/* Add Course Placeholder */}
                 <Link href="/features/course-catalog" className="contents">
                   <Card className="border-2 border-dashed border-primary/10 bg-transparent rounded-[2rem] flex items-center justify-center p-8 group cursor-pointer hover:bg-primary/5 transition-all">
                     <div className="text-center space-y-4">
@@ -174,7 +169,6 @@ export default function StudentDashboard() {
                 </Link>
               </div>
 
-              {/* Momentum Planner (StudentGoal Integration) */}
               <Card className="border-none shadow-sm bg-white rounded-[2.5rem] overflow-hidden">
                 <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
                   <div className="space-y-1">
@@ -267,7 +261,7 @@ export default function StudentDashboard() {
             </TabsContent>
           </Tabs>
 
-          {/* Evidence Portfolio (StudentPortfolioItem Integration) */}
+          {/* Evidence Portfolio */}
           <Card className="bg-secondary/20 border-2 border-dashed border-primary/10 rounded-[2.5rem] shadow-none p-6 md:p-10 transition-all hover:bg-secondary/30">
             <CardHeader className="pb-8 px-0">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -314,14 +308,53 @@ export default function StudentDashboard() {
           </Card>
         </div>
 
-        {/* Right Column: Deadlines, Feedback, and Hubs */}
         <div className="lg:col-span-4 space-y-10">
+          {/* Ecosystem Promoted Features */}
+          <div className="space-y-6">
+             <h4 className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.3em] px-2">Ecosystem Hubs</h4>
+             <div className="grid grid-cols-1 gap-4">
+                <Link href="/features/career-gateway" className="contents">
+                  <Card className="bg-white border-none shadow-sm rounded-[2rem] p-6 hover:shadow-xl hover:border-primary/20 transition-all group cursor-pointer border border-transparent overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full translate-x-1/3 -translate-y-1/3 blur-xl" />
+                    <div className="flex items-center gap-5 relative z-10">
+                      <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+                        <Briefcase className="size-6 text-primary group-hover:text-inherit" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-bold group-hover:text-primary transition-colors">Career Gateway</p>
+                        <p className="text-[10px] font-medium text-muted-foreground">3 new internships matching your profile</p>
+                      </div>
+                      <ArrowRight className="size-4 ml-auto text-muted-foreground/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </Card>
+                </Link>
+                <div className="grid grid-cols-2 gap-4">
+                  <Link href="/hubs/international-students" className="contents">
+                    <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
+                       <div className="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                          <Globe className="size-6 text-blue-500 group-hover:text-inherit" />
+                       </div>
+                       <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Global<br/>Success</span>
+                    </button>
+                  </Link>
+                  <Link href="/hubs/athletic-success" className="contents">
+                    <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
+                       <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all">
+                          <Trophy className="size-6 text-green-500 group-hover:text-inherit" />
+                       </div>
+                       <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Athletic<br/>Gateway</span>
+                    </button>
+                  </Link>
+                </div>
+             </div>
+          </div>
+
           {/* Critical Deadlines Hub */}
-          <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.03)] border space-y-8 sticky top-24">
+          <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.03)] border space-y-8">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <h3 className="text-xl font-headline font-bold flex items-center gap-3">
-                  <Clock className="text-primary size-5" /> Critical Deadlines
+                  <Clock className="text-primary size-5" /> Deadlines
                 </h3>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Timeline Prioritization</p>
               </div>
@@ -336,7 +369,6 @@ export default function StudentDashboard() {
               {[
                 { id: "cs101", title: "Quantum Entanglement Lab", due: "Tonight, 11:59 PM", type: "Lab", priority: "critical" },
                 { id: "eco202", title: "Macroeconomic Reflection", due: "Tomorrow", type: "Discussion", priority: "high" },
-                { id: "hist105", title: "Bibliography Builder Check", due: "Oct 24", type: "Research", priority: "medium" },
               ].map((item, idx) => (
                 <Link key={idx} href={`/course/${item.id}`} className="contents">
                   <div className="group flex items-start gap-4 p-5 rounded-2xl bg-muted/20 border border-transparent hover:border-primary/10 hover:bg-white hover:shadow-xl transition-all cursor-pointer">
@@ -352,16 +384,13 @@ export default function StudentDashboard() {
                 </Link>
               ))}
             </div>
-            <Button asChild className="w-full h-14 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm active:scale-95">
-              <Link href="/features/momentum-planner">Launch Study Planner</Link>
-            </Button>
           </div>
 
           {/* AI Feedback Feed */}
           <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
               <h3 className="text-xl font-headline font-bold flex items-center gap-3">
-                <Sparkles className="text-accent size-5" /> Intelligence Feed
+                <Sparkles className="text-accent size-5" /> Intelligence
               </h3>
               <Badge variant="outline" className="bg-white border-primary/10 text-[9px] font-bold px-3">2 NEW</Badge>
             </div>
@@ -384,37 +413,11 @@ export default function StudentDashboard() {
                           "{insight.feedback}"
                         </p>
                       </div>
-                      <div className="h-auto p-0 text-primary font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 group/btn">
-                        Detailed Breakdown <ArrowUpRight className="size-3 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
-                      </div>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
             </div>
-          </div>
-
-          {/* Specialized Success Hubs */}
-          <div className="space-y-6">
-             <h4 className="text-[10px] font-bold uppercase text-muted-foreground tracking-[0.3em] px-2">Ecosystem Hubs</h4>
-             <div className="grid grid-cols-2 gap-4">
-                <Link href="/hubs/international-students" className="contents">
-                  <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
-                     <div className="size-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                        <Globe className="size-6 text-blue-500 group-hover:text-inherit" />
-                     </div>
-                     <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Global<br/>Success</span>
-                  </button>
-                </Link>
-                <Link href="/hubs/athletic-success" className="contents">
-                  <button className="flex flex-col items-center justify-center p-8 bg-white rounded-[2.5rem] border shadow-sm hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all group">
-                     <div className="size-12 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-green-500 group-hover:text-white transition-all">
-                        <Trophy className="size-6 text-green-500 group-hover:text-inherit" />
-                     </div>
-                     <span className="text-[10px] font-bold uppercase tracking-widest text-center leading-tight">Athletic<br/>Gateway</span>
-                  </button>
-                </Link>
-             </div>
           </div>
         </div>
       </div>

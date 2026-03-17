@@ -1,12 +1,12 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ShieldCheck, 
   Activity, 
@@ -20,12 +20,27 @@ import {
   Lock,
   Construction,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  Plus,
+  Briefcase,
+  Calendar,
+  MoreVertical,
+  Edit3,
+  Trash2,
+  Search,
+  CloudUpload
 } from "lucide-react";
 import { useFirestore, useUser } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function AdminDashboard() {
   const db = useFirestore();
@@ -33,6 +48,17 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Ecosystem Mock State for CRUD demo
+  const [jobs, setJobs] = useState([
+    { id: "j1", title: "Quantum Systems Intern", company: "Nexus Labs", type: "Internship" },
+    { id: "j2", title: "Data Architect", company: "Stellar Analytics", type: "Full-time" },
+  ]);
+
+  const [events, setEvents] = useState([
+    { id: "e1", title: "Global Gastronomy Fest", date: "Oct 25", loc: "Main Quad" },
+    { id: "e2", title: "AI Compliance Workshop", date: "Nov 02", loc: "Virtual Hub" },
+  ]);
 
   // Fetch current maintenance status
   useEffect(() => {
@@ -53,8 +79,6 @@ export default function AdminDashboard() {
   const toggleMaintenance = async (checked: boolean) => {
     setIsUpdating(true);
     
-    // In Observer/Preview mode, we simulate the update because guest users 
-    // lack write permissions to system settings in Firestore.
     if (user?.isAnonymous) {
       setTimeout(() => {
         setMaintenanceEnabled(checked);
@@ -67,7 +91,6 @@ export default function AdminDashboard() {
           variant: checked ? "destructive" : "default"
         });
         
-        // In simulation, we force the redirect manually since the Firestore listener won't fire
         if (checked) {
           setTimeout(() => router.push("/maintenance"), 1500);
         }
@@ -114,7 +137,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-1">
           <h2 className="text-4xl font-headline font-bold text-primary tracking-tight">System Root Console</h2>
-          <p className="text-muted-foreground font-medium text-lg">Platform orchestration and high-level ecosystem oversight.</p>
+          <p className="text-muted-foreground font-medium text-lg">Platform orchestration and ecosystem governance.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="rounded-xl border-primary/20 h-12 px-6 font-bold">
@@ -145,100 +168,205 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-8 space-y-10">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-2xl font-headline font-bold">Platform Governance</h3>
-            <Badge variant="outline" className="border-primary/10 text-primary font-bold uppercase tracking-widest text-[9px] px-3 h-6">Cluster: A-Primary</Badge>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-6">
-            {/* Maintenance Mode Controller */}
-            <Card className={`border-none shadow-sm rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 transition-all duration-500 ${maintenanceEnabled ? 'bg-destructive/5 ring-2 ring-destructive/20' : 'bg-white'}`}>
-              <div className="flex items-center gap-8">
-                <div className={`h-20 w-20 rounded-[2rem] flex items-center justify-center shrink-0 transition-colors ${maintenanceEnabled ? 'bg-destructive/10' : 'bg-orange-500/10'}`}>
-                  {maintenanceEnabled ? <AlertTriangle className="size-10 text-destructive animate-pulse" /> : <Construction className="size-10 text-orange-500" />}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <h4 className="text-2xl font-headline font-bold">Global Maintenance Mode</h4>
-                    {maintenanceEnabled && <Badge variant="destructive" className="animate-pulse">ACTIVE</Badge>}
+      <Tabs defaultValue="governance" className="space-y-10">
+        <TabsList className="bg-muted/50 p-1.5 rounded-2xl h-14 border border-primary/5">
+          <TabsTrigger value="governance" className="rounded-xl px-8 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm">Governance</TabsTrigger>
+          <TabsTrigger value="ecosystem" className="rounded-xl px-8 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm">Ecosystem CRUD</TabsTrigger>
+          <TabsTrigger value="users" className="rounded-xl px-8 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm">User Directory</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="governance" className="space-y-10 animate-in fade-in duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-8 space-y-10">
+              <Card className={`border-none shadow-sm rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 transition-all duration-500 ${maintenanceEnabled ? 'bg-destructive/5 ring-2 ring-destructive/20' : 'bg-white'}`}>
+                <div className="flex items-center gap-8">
+                  <div className={`h-20 w-20 rounded-[2rem] flex items-center justify-center shrink-0 transition-colors ${maintenanceEnabled ? 'bg-destructive/10' : 'bg-orange-500/10'}`}>
+                    {maintenanceEnabled ? <AlertTriangle className="size-10 text-destructive animate-pulse" /> : <Construction className="size-10 text-orange-500" />}
                   </div>
-                  <p className="text-muted-foreground font-medium max-w-sm leading-relaxed">
-                    Redirect all traffic to the restoration hub. Includes interactive puzzles for user engagement during downtime.
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <h4 className="text-2xl font-headline font-bold">Global Maintenance Mode</h4>
+                      {maintenanceEnabled && <Badge variant="destructive" className="animate-pulse">ACTIVE</Badge>}
+                    </div>
+                    <p className="text-muted-foreground font-medium max-w-sm leading-relaxed">
+                      Restrict all user traffic to the interactive neural benchmarks during platform scaling.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-3 bg-muted/30 p-6 rounded-3xl min-w-[200px]">
+                  <Label htmlFor="maint-switch" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Status Control</Label>
+                  <Switch 
+                    id="maint-switch"
+                    checked={maintenanceEnabled}
+                    onCheckedChange={toggleMaintenance}
+                    disabled={isUpdating}
+                    className="data-[state=checked]:bg-destructive"
+                  />
+                  <span className={`text-[10px] font-bold uppercase ${maintenanceEnabled ? 'text-destructive' : 'text-muted-foreground'}`}>
+                    {isUpdating ? 'Syncing...' : maintenanceEnabled ? 'Maintenance ON' : 'Production LIVE'}
+                  </span>
+                </div>
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="border-none shadow-sm bg-white rounded-[2rem] p-8 space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-500/10 rounded-2xl">
+                      <Users className="size-6 text-blue-500" />
+                    </div>
+                    <h5 className="font-headline font-bold text-xl">User Orchestration</h5>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">Manage verified nodes and institutional identity protocols.</p>
+                  <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Manage Roles</Button>
+                </Card>
+                <Card className="border-none shadow-sm bg-white rounded-[2rem] p-8 space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-green-500/10 rounded-2xl">
+                      <Globe className="size-6 text-green-500" />
+                    </div>
+                    <h5 className="font-headline font-bold text-xl">Compliance Logs</h5>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">Audit the ecosystem's adherence to global educational standards.</p>
+                  <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Review Logs</Button>
+                </Card>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 space-y-10">
+              <div className="bg-primary text-primary-foreground rounded-[2.5rem] border-none p-10 space-y-6 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
+                <div className="space-y-2 relative z-10">
+                  <h4 className="text-xl font-headline font-bold">Admin Privileges</h4>
+                  <p className="text-sm opacity-70 font-medium">Unrestricted access to the core platform neural layer. Use with high discretion.</p>
+                </div>
+                <div className="h-px bg-white/10" />
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest opacity-40">
+                   <span>Session Identity</span>
+                   <span>ROOT-AUTH</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ecosystem" className="space-y-10 animate-in fade-in duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div className="lg:col-span-8 space-y-8">
+              <div className="flex items-center justify-between px-2">
+                <div className="space-y-1">
+                  <h3 className="text-3xl font-headline font-bold">Ecosystem Management</h3>
+                  <p className="text-muted-foreground font-medium">Full CRUD operations for Job Opportunities and Institution Events.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button className="bg-accent hover:bg-accent/90 rounded-xl h-12 px-6 font-bold shadow-lg shadow-accent/10">
+                    <Plus className="size-4 mr-2" /> Create New Asset
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-10">
+                {/* Jobs Management Section */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 px-2">
+                    <Briefcase className="size-5 text-primary" />
+                    <h4 className="text-lg font-headline font-bold uppercase tracking-widest text-primary">Job Opportunities</h4>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    {jobs.map(job => (
+                      <Card key={job.id} className="border-none shadow-sm bg-white rounded-3xl p-6 group">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-6">
+                            <div className="size-12 rounded-2xl bg-muted flex items-center justify-center">
+                              <Briefcase className="size-6 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-base font-bold group-hover:text-primary transition-colors">{job.title}</p>
+                              <p className="text-xs font-medium text-muted-foreground">{job.company} • {job.type}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/5">
+                              <Edit3 className="size-4 text-muted-foreground" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-destructive/5 text-destructive">
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Events Management Section */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 px-2">
+                    <Calendar className="size-5 text-accent" />
+                    <h4 className="text-lg font-headline font-bold uppercase tracking-widest text-accent">Institutional Events</h4>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    {events.map(event => (
+                      <Card key={event.id} className="border-none shadow-sm bg-white rounded-3xl p-6 group">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-6">
+                            <div className="size-12 rounded-2xl bg-muted flex items-center justify-center">
+                              <Calendar className="size-6 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="text-base font-bold group-hover:text-accent transition-colors">{event.title}</p>
+                              <p className="text-xs font-medium text-muted-foreground">{event.date} • {event.loc}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-accent/5">
+                              <Edit3 className="size-4 text-muted-foreground" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-destructive/5 text-destructive">
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 space-y-8">
+              <Card className="border-none shadow-sm bg-secondary/30 rounded-[2.5rem] p-8 space-y-6">
+                <div className="space-y-2">
+                  <Sparkles className="size-8 text-accent" />
+                  <h4 className="text-xl font-headline font-bold">Asset Analysis</h4>
+                  <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                    The intelligence layer suggests adding more "STEM-focused" events to increase engagement in the Engineering cohort.
                   </p>
                 </div>
-              </div>
-              <div className="flex flex-col items-center gap-3 bg-muted/30 p-6 rounded-3xl min-w-[200px]">
-                <Label htmlFor="maint-switch" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Status Control</Label>
-                <Switch 
-                  id="maint-switch"
-                  checked={maintenanceEnabled}
-                  onCheckedChange={toggleMaintenance}
-                  disabled={isUpdating}
-                  className="data-[state=checked]:bg-destructive"
-                />
-                <span className={`text-[10px] font-bold uppercase ${maintenanceEnabled ? 'text-destructive' : 'text-muted-foreground'}`}>
-                  {isUpdating ? 'Synchronizing...' : maintenanceEnabled ? 'Maintenance ON' : 'Production LIVE'}
-                </span>
-              </div>
-            </Card>
+                <Button className="w-full rounded-xl h-12 font-bold shadow-sm">Review Recommendations</Button>
+              </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-none shadow-sm bg-white rounded-[2rem] p-8 space-y-6 group hover:shadow-xl transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-500/10 rounded-2xl">
-                    <Users className="size-6 text-blue-500" />
+              <div className="space-y-6 px-2">
+                <h4 className="text-xs font-bold uppercase text-muted-foreground tracking-[0.2em]">Platform Metrics</h4>
+                <div className="bg-white rounded-3xl border p-6 space-y-4 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-muted-foreground">Live Hubs</span>
+                    <span className="text-sm font-bold">12</span>
                   </div>
-                  <h5 className="font-headline font-bold text-xl">User Orchestration</h5>
-                </div>
-                <p className="text-sm text-muted-foreground font-medium">Manage access protocols for 1,200+ students and 45 faculty members.</p>
-                <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Access Directory</Button>
-              </Card>
-              <Card className="border-none shadow-sm bg-white rounded-[2rem] p-8 space-y-6 group hover:shadow-xl transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-green-500/10 rounded-2xl">
-                    <Globe className="size-6 text-green-500" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-muted-foreground">Ecosystem Artifacts</span>
+                    <span className="text-sm font-bold">1,402</span>
                   </div>
-                  <h5 className="font-headline font-bold text-xl">Global Expansion</h5>
+                  <div className="pt-4 border-t">
+                    <Button variant="link" className="p-0 h-auto text-primary font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+                      Full Asset Export <CloudUpload className="size-4" />
+                    </Button>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground font-medium">Coordinate international scholar hubs and multi-regional compliance nodes.</p>
-                <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Regional Ops</Button>
-              </Card>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="lg:col-span-4 space-y-10">
-          <div className="space-y-6">
-            <h3 className="text-xl font-headline font-bold px-2">Security Perimeter</h3>
-            <div className="bg-secondary/30 rounded-[2.5rem] p-8 space-y-6">
-               {[1, 2, 3].map(i => (
-                 <div key={i} className="bg-white p-6 rounded-2xl border shadow-sm space-y-3 relative group cursor-pointer hover:border-primary/20 transition-all">
-                    <div className="flex items-center justify-between">
-                       <Badge className="bg-green-500/10 text-green-600 border-none text-[8px] font-bold tracking-tighter">SECURE</Badge>
-                       <span className="text-[9px] font-bold text-muted-foreground/40 uppercase">12:0{i} PM</span>
-                    </div>
-                    <p className="text-sm font-bold leading-tight group-hover:text-primary transition-colors">Access point verified for Cluster {i}</p>
-                    <p className="text-[10px] font-medium text-muted-foreground">Standard identity handshake completed via Auth Node.</p>
-                 </div>
-               ))}
-            </div>
-          </div>
-          
-          <Card className="bg-primary text-primary-foreground rounded-[2.5rem] border-none p-10 space-y-6 shadow-2xl">
-            <div className="space-y-2">
-              <h4 className="text-xl font-headline font-bold">Admin Privileges</h4>
-              <p className="text-sm opacity-70 font-medium">You have unrestricted access to the core platform protocols. Use with discretion.</p>
-            </div>
-            <div className="h-px bg-white/10" />
-            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest opacity-40">
-               <span>Session Identity</span>
-               <span>ROOT-AUTH</span>
-            </div>
-          </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
