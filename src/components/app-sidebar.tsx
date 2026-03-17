@@ -54,7 +54,7 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
   const navigation = {
     student: [
       { name: "Dashboard", href: "/dashboard/student", icon: LayoutDashboard },
-      { name: "My Courses", href: "/course/cs101", icon: BookOpen }, // Links to a sample course studio for now
+      { name: "My Courses", href: "/course/cs101", icon: BookOpen },
       { name: "AI Writing Center", href: "/features/ai-writing-center", icon: PenTool },
       { name: "AI Research Hub", href: "/features/ai-research-hub", icon: Search },
       { name: "Skills Map", href: "/features/skills-map", icon: Zap },
@@ -117,29 +117,27 @@ export function AppSidebar({ role = "student" }: { role?: "student" | "instructo
         
         <SidebarSeparator />
         
-        {role !== "observer" && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/50">Ecosystem</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Global Scholars" isActive={pathname === "/hubs/international-students"}>
-                  <Link href="/hubs/international-students">
-                    <Globe className="size-4" />
-                    <span>Global Scholars</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Career Gateway" isActive={pathname === "/features/career-gateway"}>
-                  <Link href="/features/career-gateway">
-                    <Briefcase className="size-4" />
-                    <span>Career Gateway</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/50">Ecosystem</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Global Scholars" isActive={pathname === "/hubs/international-students"}>
+                <Link href="/hubs/international-students">
+                  <Globe className="size-4" />
+                  <span>Global Scholars</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Career Gateway" isActive={pathname === "/features/career-gateway"}>
+                <Link href="/features/career-gateway">
+                  <Briefcase className="size-4" />
+                  <span>Career Gateway</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border/50">
         <SidebarMenu>

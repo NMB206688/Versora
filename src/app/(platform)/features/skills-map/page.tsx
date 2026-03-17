@@ -15,6 +15,7 @@ import {
   Search,
   ArrowUpRight
 } from "lucide-react";
+import Link from "next/link";
 import { 
   ResponsiveContainer, 
   Radar, 
@@ -61,8 +62,10 @@ export default function SkillsMapPage() {
             A real-time visualization of your academic DNA, synthesized from assignment performance and AI-detected competencies.
           </p>
         </div>
-        <Button size="lg" className="rounded-2xl h-16 px-10 font-bold bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20">
-          <TrendingUp className="size-5 mr-3" /> Career Projection
+        <Button asChild size="lg" className="rounded-2xl h-16 px-10 font-bold bg-accent hover:bg-accent/90 shadow-xl shadow-accent/20">
+          <Link href="/features/career-gateway">
+            <TrendingUp className="size-5 mr-3" /> Career Projection
+          </Link>
         </Button>
       </div>
 
