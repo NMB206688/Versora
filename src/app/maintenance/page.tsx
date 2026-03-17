@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Construction, BrainCircuit, Trophy, ArrowRight, RefreshCcw, Sparkles } from "lucide-react";
+import { Zap, Construction, BrainCircuit, Trophy, ArrowRight, RefreshCcw, Sparkles, ShieldCheck, LogIn } from "lucide-react";
 import Link from "next/link";
+import { useUser, useFirestore } from "@/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const PUZZLES = [
   { q: "What is 2 + 2 * 2?", a: ["6", "8", "4", "10"], c: 0 },
@@ -33,10 +35,26 @@ const PUZZLES = [
 ];
 
 export default function MaintenancePage() {
+  const { user } = useUser();
+  const db = useFirestore();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [wrongAnswer, setWrongAnswer] = useState<number | null>(null);
+
+  // Identify Admin status to show the escape button
+  useEffect(() => {
+    async function checkAdmin() {
+      if (user && !user.isAnonymous) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists() && userDoc.data().role?.toLowerCase() === 'admin') {
+          setIsAdmin(true);
+        }
+      }
+    }
+    checkAdmin();
+  }, [user, db]);
 
   const handleAnswer = (idx: number) => {
     if (idx === PUZZLES[currentStep].c) {
@@ -62,8 +80,22 @@ export default function MaintenancePage() {
 
   return (
     <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-6 text-primary-foreground relative overflow-hidden">
+      {/* Dynamic Background Elements */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[150px] animate-pulse" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[80px]" />
+
+      {/* Admin Escape Button */}
+      {isAdmin && (
+        <div className="absolute top-8 right-8 z-50 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <Button asChild variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20 text-white rounded-2xl h-12 px-6 font-bold backdrop-blur-xl group shadow-2xl">
+            <Link href="/" className="flex items-center gap-3">
+              <ShieldCheck className="size-5 text-accent" />
+              <span>Back to Live (Admin)</span>
+              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </div>
+      )}
 
       <div className="relative z-10 w-full max-w-2xl space-y-12 animate-in fade-in zoom-in duration-1000">
         {/* Maintenance Header */}
@@ -73,7 +105,7 @@ export default function MaintenancePage() {
             <span className="text-xs font-bold tracking-[0.3em] uppercase">Ecosystem Sync in Progress</span>
           </div>
           <h1 className="text-5xl font-headline font-bold tracking-tight">Undergoing Neural Evolution</h1>
-          <p className="text-lg opacity-60 max-w-lg mx-auto font-medium">
+          <p className="text-lg opacity-60 max-w-lg mx-auto font-medium leading-relaxed">
             Versora is currently scaling its intelligence layer. While we optimize the architecture, challenge yourself with our Neural Benchmarks.
           </p>
         </div>
@@ -87,7 +119,7 @@ export default function MaintenancePage() {
                 </Badge>
                 <div className="flex items-center gap-2 text-accent">
                   <BrainCircuit className="size-5" />
-                  <span className="text-sm font-bold">IQ: {Math.round((score / PUZZLES.length) * 160)}</span>
+                  <span className="text-sm font-bold tracking-tighter">IQ VELOCITY: {Math.round((score / (currentStep || 1)) * 160)}</span>
                 </div>
               </div>
               <div className="space-y-4">
@@ -128,7 +160,7 @@ export default function MaintenancePage() {
                </div>
                <div className="flex justify-between items-center px-4">
                   <span className="text-xs font-bold uppercase tracking-widest opacity-40">Intelligence Rank</span>
-                  <Badge className="bg-accent text-white border-none font-bold uppercase tracking-tighter">VERSORA MASTER</Badge>
+                  <Badge className="bg-accent text-white border-none font-bold uppercase tracking-tighter px-4">VERSORA MASTER</Badge>
                </div>
             </div>
             <div className="flex gap-4">
@@ -145,8 +177,8 @@ export default function MaintenancePage() {
         )}
 
         <div className="flex justify-center pt-8">
-          <div className="flex items-center gap-4 opacity-30 grayscale cursor-default">
-             <Zap className="size-5 text-accent" />
+          <div className="flex items-center gap-4 opacity-30 grayscale cursor-default group transition-all hover:grayscale-0">
+             <Zap className="size-5 text-accent group-hover:scale-110 transition-transform" />
              <span className="text-[10px] font-bold uppercase tracking-[0.6em]">System Restoration in Progress</span>
           </div>
         </div>
