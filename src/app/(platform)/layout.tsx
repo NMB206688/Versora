@@ -1,11 +1,10 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Search, User, Loader2, LogOut, Settings, UserCircle, Sparkles } from "lucide-react";
+import { Bell, Search, User, Loader2, LogOut, Settings, UserCircle, Sparkles, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useFirestore, useAuth } from "@/firebase";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
@@ -32,11 +31,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   const [role, setRole] = useState<"student" | "instructor" | "admin" | "observer" | null>(null);
   const [isLoadingRole, setIsLoadingRole] = useState(true);
 
-  // Maintenance mode real-time listener
   useEffect(() => {
-    // Only set up the listener if the user is authenticated. 
-    // This prevents "Missing or insufficient permissions" errors caused by 
-    // requesting data before the Firebase Auth token is attached.
     if (!user) return;
 
     const maintenanceDocRef = doc(db, "systemSettings", "maintenance_mode");
@@ -45,22 +40,16 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       maintenanceDocRef, 
       (snap) => {
         if (snap.exists() && snap.data().enabled === true) {
-          // If maintenance is ON and user is NOT admin, redirect to maintenance
-          // We only check if role is resolved to avoid premature redirection.
-          // Admins are exempt to allow them to turn it off.
           if (role && role !== "admin") {
             router.push("/maintenance");
           }
         }
       },
       async (serverError) => {
-        // Handle listener failure with contextual error architecture
         const permissionError = new FirestorePermissionError({
           path: maintenanceDocRef.path,
           operation: 'get',
         } satisfies SecurityRuleContext);
-
-        // Emit the error with the global error emitter
         errorEmitter.emit('permission-error', permissionError);
       }
     );
@@ -89,7 +78,6 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
             setRole("student");
           }
         } catch (error) {
-          console.error("Error fetching role for sidebar:", error);
           setRole("student");
         } finally {
           setIsLoadingRole(false);
@@ -118,6 +106,11 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     );
   }
 
+  const showBackButton = pathname !== "/dashboard/student" && 
+                        pathname !== "/dashboard/instructor" && 
+                        pathname !== "/dashboard/admin" && 
+                        pathname !== "/dashboard/observatory";
+
   return (
     <SidebarProvider>
       <AppSidebar role={role || "student"} />
@@ -126,6 +119,22 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex items-center gap-4">
             <SidebarTrigger className="-ml-1 h-9 w-9 rounded-xl hover:bg-primary/5" />
             <Separator orientation="vertical" className="mr-2 h-6" />
+            
+            {showBackButton && (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => router.back()}
+                  className="rounded-xl h-9 px-3 font-bold text-muted-foreground hover:text-primary transition-all group"
+                >
+                  <ChevronLeft className="size-4 mr-1 group-hover:-translate-x-0.5 transition-transform" /> 
+                  Back
+                </Button>
+                <Separator orientation="vertical" className="mr-2 h-6" />
+              </>
+            )}
+
             {role === "observer" && (
               <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20 px-4 py-1.5 rounded-full font-bold uppercase tracking-widest text-[10px] hidden sm:flex items-center gap-2">
                 <Sparkles className="size-3 animate-pulse" /> Observer Preview

@@ -38,8 +38,10 @@ export default function InstructorDashboard() {
             <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input placeholder="Find student or course..." className="pl-10 h-10 w-64 rounded-xl border-primary/10 bg-white" />
           </div>
-          <Button variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 h-10">
-            <BarChart3 className="size-4 mr-2" /> Global Stats
+          <Button asChild variant="outline" className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 h-10">
+            <Link href="/features/insights">
+              <BarChart3 className="size-4 mr-2" /> Global Stats
+            </Link>
           </Button>
           <Button className="bg-primary hover:bg-primary/90 rounded-xl h-10 shadow-lg shadow-primary/20">
             <Plus className="size-4 mr-2" /> New Course
