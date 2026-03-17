@@ -1,9 +1,12 @@
 
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { 
   ShieldCheck, 
   Activity, 
@@ -14,10 +17,65 @@ import {
   Settings, 
   Cpu,
   Globe,
-  Lock
+  Lock,
+  Construction,
+  Sparkles,
+  AlertTriangle
 } from "lucide-react";
+import { useFirestore } from "@/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
+  const db = useFirestore();
+  const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Fetch current maintenance status
+  useEffect(() => {
+    async function fetchStatus() {
+      try {
+        const docRef = doc(db, "systemSettings", "maintenance_mode");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setMaintenanceEnabled(docSnap.data().enabled === true);
+        }
+      } catch (e) {
+        console.error("Error fetching status", e);
+      }
+    }
+    fetchStatus();
+  }, [db]);
+
+  const toggleMaintenance = async (checked: boolean) => {
+    setIsUpdating(true);
+    try {
+      await setDoc(doc(db, "systemSettings", "maintenance_mode"), {
+        enabled: checked,
+        updatedAt: new Date().toISOString(),
+        key: "maintenance_mode",
+        scope: "Global"
+      }, { merge: true });
+      
+      setMaintenanceEnabled(checked);
+      toast({
+        title: checked ? "Maintenance Enabled" : "Maintenance Disabled",
+        description: checked 
+          ? "Platform is now visible as 'Under Construction' to all non-admins." 
+          : "Standard platform protocols restored.",
+        variant: checked ? "destructive" : "default"
+      });
+    } catch (e) {
+      toast({
+        title: "Update Failed",
+        description: "Could not synchronize with the intelligence layer.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const systemMetrics = [
     { label: "Active Nodes", value: "142", icon: Activity, color: "text-blue-500" },
     { label: "Neural Load", value: "24%", icon: Cpu, color: "text-purple-500" },
@@ -36,7 +94,7 @@ export default function AdminDashboard() {
           <Button variant="outline" className="rounded-xl border-primary/20 h-12 px-6 font-bold">
             <Lock className="size-4 mr-2" /> Security Audit
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-8 shadow-xl shadow-primary/20 font-bold">
+          <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-8 shadow-xl shadow-primary/20 font-bold text-white">
             <Settings className="size-4 mr-2" /> Global Config
           </Button>
         </div>
@@ -69,17 +127,35 @@ export default function AdminDashboard() {
           </div>
           
           <div className="grid grid-cols-1 gap-6">
-            <Card className="border-none shadow-sm bg-white rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 group hover:shadow-2xl transition-all duration-500">
+            {/* Maintenance Mode Controller */}
+            <Card className={`border-none shadow-sm rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 transition-all duration-500 ${maintenanceEnabled ? 'bg-destructive/5 ring-2 ring-destructive/20' : 'bg-white'}`}>
               <div className="flex items-center gap-8">
-                <div className="h-20 w-20 rounded-[2rem] bg-accent/10 flex items-center justify-center shrink-0">
-                  <Zap className="size-10 text-accent animate-pulse" />
+                <div className={`h-20 w-20 rounded-[2rem] flex items-center justify-center shrink-0 transition-colors ${maintenanceEnabled ? 'bg-destructive/10' : 'bg-orange-500/10'}`}>
+                  {maintenanceEnabled ? <AlertTriangle className="size-10 text-destructive animate-pulse" /> : <Construction className="size-10 text-orange-500" />}
                 </div>
                 <div className="space-y-2">
-                  <h4 className="text-2xl font-headline font-bold">Ecosystem Innovation Layer</h4>
-                  <p className="text-muted-foreground font-medium max-w-sm">AI model refinement and curriculum automation strategies are performing at 98% efficiency.</p>
+                  <div className="flex items-center gap-3">
+                    <h4 className="text-2xl font-headline font-bold">Global Maintenance Mode</h4>
+                    {maintenanceEnabled && <Badge variant="destructive" className="animate-pulse">ACTIVE</Badge>}
+                  </div>
+                  <p className="text-muted-foreground font-medium max-w-sm leading-relaxed">
+                    Redirect all traffic to the restoration hub. Includes interactive puzzles for user engagement during downtime.
+                  </p>
                 </div>
               </div>
-              <Button size="lg" className="rounded-2xl h-16 px-10 font-bold bg-accent hover:bg-accent/90 text-white shadow-xl shadow-accent/20">Review AI Logs</Button>
+              <div className="flex flex-col items-center gap-3 bg-muted/30 p-6 rounded-3xl min-w-[200px]">
+                <Label htmlFor="maint-switch" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Status Control</Label>
+                <Switch 
+                  id="maint-switch"
+                  checked={maintenanceEnabled}
+                  onCheckedChange={toggleMaintenance}
+                  disabled={isUpdating}
+                  className="data-[state=checked]:bg-destructive"
+                />
+                <span className={`text-[10px] font-bold uppercase ${maintenanceEnabled ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {isUpdating ? 'Synchronizing...' : maintenanceEnabled ? 'Maintenance ON' : 'Production LIVE'}
+                </span>
+              </div>
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -8,9 +8,9 @@ import { Separator } from "@/components/ui/separator";
 import { Bell, Search, User, Loader2, LogOut, Settings, UserCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useFirestore, useAuth } from "@/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { signOut } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,8 +26,23 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
+  const pathname = usePathname();
   const [role, setRole] = useState<"student" | "instructor" | "admin" | "observer" | null>(null);
   const [isLoadingRole, setIsLoadingRole] = useState(true);
+
+  // Maintenance mode real-time listener
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "systemSettings", "maintenance_mode"), (snap) => {
+      if (snap.exists() && snap.data().enabled === true) {
+        // If maintenance is ON and user is NOT admin, redirect to maintenance
+        // We only check if role is resolved to avoid premature redirection
+        if (role && role !== "admin") {
+          router.push("/maintenance");
+        }
+      }
+    });
+    return () => unsub();
+  }, [db, role, router]);
 
   useEffect(() => {
     async function fetchRole() {
