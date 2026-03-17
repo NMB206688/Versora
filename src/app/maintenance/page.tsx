@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Zap, Construction, BrainCircuit, Trophy, ArrowRight, RefreshCcw, Sparkles, ShieldCheck, LogIn } from "lucide-react";
+import { Zap, Construction, BrainCircuit, Trophy, ArrowRight, RefreshCcw, Sparkles, ShieldCheck, LogIn, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -37,23 +37,30 @@ const PUZZLES = [
 export default function MaintenancePage() {
   const { user } = useUser();
   const db = useFirestore();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [canExit, setCanExit] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [wrongAnswer, setWrongAnswer] = useState<number | null>(null);
 
-  // Identify Admin status to show the escape button
+  // Identify Admin status or Observer status to show the exit button
   useEffect(() => {
-    async function checkAdmin() {
-      if (user && !user.isAnonymous) {
+    async function checkIdentity() {
+      if (user) {
+        // Observers can always exit during preview
+        if (user.isAnonymous) {
+          setCanExit(true);
+          return;
+        }
+
+        // Verified Admins can exit
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists() && userDoc.data().role?.toLowerCase() === 'admin') {
-          setIsAdmin(true);
+          setCanExit(true);
         }
       }
     }
-    checkAdmin();
+    checkIdentity();
   }, [user, db]);
 
   const handleAnswer = (idx: number) => {
@@ -84,13 +91,13 @@ export default function MaintenancePage() {
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[150px] animate-pulse" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full blur-[80px]" />
 
-      {/* Admin Escape Button */}
-      {isAdmin && (
+      {/* Exit Button - Visible to Admins and Observers */}
+      {canExit && (
         <div className="absolute top-8 right-8 z-50 animate-in fade-in slide-in-from-top-4 duration-1000">
           <Button asChild variant="outline" className="bg-white/10 hover:bg-white/20 border-white/20 text-white rounded-2xl h-12 px-6 font-bold backdrop-blur-xl group shadow-2xl">
             <Link href="/" className="flex items-center gap-3">
-              <ShieldCheck className="size-5 text-accent" />
-              <span>Back to Live (Admin)</span>
+              <Undo2 className="size-5 text-accent" />
+              <span>Back to Normal</span>
               <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
@@ -169,7 +176,7 @@ export default function MaintenancePage() {
               </Button>
               <Button asChild className="flex-1 h-14 rounded-2xl bg-white text-primary hover:bg-white/90 font-bold shadow-xl shadow-black/20">
                 <Link href="/">
-                  Return to Nexus <ArrowRight className="size-4 ml-2" />
+                  Return to Normal <ArrowRight className="size-4 ml-2" />
                 </Link>
               </Button>
             </div>

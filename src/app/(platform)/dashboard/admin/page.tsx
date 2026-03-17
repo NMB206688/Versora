@@ -22,12 +22,13 @@ import {
   Sparkles,
   AlertTriangle
 } from "lucide-react";
-import { useFirestore } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
   const db = useFirestore();
+  const { user } = useUser();
   const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -49,6 +50,22 @@ export default function AdminDashboard() {
 
   const toggleMaintenance = async (checked: boolean) => {
     setIsUpdating(true);
+    
+    // In Observer/Preview mode, we simulate the update because guest users 
+    // lack write permissions to system settings in Firestore.
+    if (user?.isAnonymous) {
+      setTimeout(() => {
+        setMaintenanceEnabled(checked);
+        setIsUpdating(false);
+        toast({
+          title: checked ? "Maintenance Protocol Active (Simulated)" : "Maintenance Disabled (Simulated)",
+          description: "Observer mode: Identity verified for simulation. Non-admins would now see the restoration hub.",
+          variant: checked ? "destructive" : "default"
+        });
+      }, 800);
+      return;
+    }
+
     try {
       await setDoc(doc(db, "systemSettings", "maintenance_mode"), {
         enabled: checked,
@@ -68,7 +85,7 @@ export default function AdminDashboard() {
     } catch (e) {
       toast({
         title: "Update Failed",
-        description: "Could not synchronize with the intelligence layer.",
+        description: "Standard security rules blocked the update. Are you signed in as a verified root admin?",
         variant: "destructive"
       });
     } finally {
