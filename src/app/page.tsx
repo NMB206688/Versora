@@ -162,7 +162,7 @@ export default function EntryPage() {
             <Zap className="text-primary size-8" />
           </div>
           <h2 className="text-3xl font-headline font-bold text-primary tracking-tight">
-            {mode === "login" ? "Identity Access" : "Join the Nexus"}
+            {mode === "login" ? "Welcome to VERSORA AI" : "Join the Nexus"}
           </h2>
         </div>
 
