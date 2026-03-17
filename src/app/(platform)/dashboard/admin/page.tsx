@@ -25,10 +25,12 @@ import {
 import { useFirestore, useUser } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const db = useFirestore();
   const { user } = useUser();
+  const router = useRouter();
   const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -59,9 +61,16 @@ export default function AdminDashboard() {
         setIsUpdating(false);
         toast({
           title: checked ? "Maintenance Protocol Active (Simulated)" : "Maintenance Disabled (Simulated)",
-          description: "Observer mode: Identity verified for simulation. Non-admins would now see the restoration hub.",
+          description: checked 
+            ? "Redirecting all non-admin sessions to the restoration hub..." 
+            : "Standard platform protocols restored.",
           variant: checked ? "destructive" : "default"
         });
+        
+        // In simulation, we force the redirect manually since the Firestore listener won't fire
+        if (checked) {
+          setTimeout(() => router.push("/maintenance"), 1500);
+        }
       }, 800);
       return;
     }

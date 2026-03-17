@@ -32,10 +32,13 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
 
   // Maintenance mode real-time listener
   useEffect(() => {
+    // We only listen for the real DB state. 
+    // Manual simulation for "Observer" role is handled in the Admin page toggle.
     const unsub = onSnapshot(doc(db, "systemSettings", "maintenance_mode"), (snap) => {
       if (snap.exists() && snap.data().enabled === true) {
         // If maintenance is ON and user is NOT admin, redirect to maintenance
-        // We only check if role is resolved to avoid premature redirection
+        // We only check if role is resolved to avoid premature redirection.
+        // Admins are exempt to allow them to turn it off.
         if (role && role !== "admin") {
           router.push("/maintenance");
         }
