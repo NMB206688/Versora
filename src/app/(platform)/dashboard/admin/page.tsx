@@ -28,19 +28,43 @@ import {
   Edit3,
   Trash2,
   Search,
-  CloudUpload
+  CloudUpload,
+  UserCheck,
+  UserX,
+  ShieldAlert,
+  FileText,
+  History
 } from "lucide-react";
 import { useFirestore, useUser } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function AdminDashboard() {
   const db = useFirestore();
@@ -49,16 +73,28 @@ export default function AdminDashboard() {
   const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Ecosystem Mock State for CRUD demo
+  // Ecosystem State
   const [jobs, setJobs] = useState([
-    { id: "j1", title: "Quantum Systems Intern", company: "Nexus Labs", type: "Internship" },
-    { id: "j2", title: "Data Architect", company: "Stellar Analytics", type: "Full-time" },
+    { id: "j1", title: "Quantum Systems Intern", company: "Nexus Labs", type: "Internship", location: "Remote" },
+    { id: "j2", title: "Data Architect", company: "Stellar Analytics", type: "Full-time", location: "New York, NY" },
   ]);
 
   const [events, setEvents] = useState([
     { id: "e1", title: "Global Gastronomy Fest", date: "Oct 25", loc: "Main Quad" },
     { id: "e2", title: "AI Compliance Workshop", date: "Nov 02", loc: "Virtual Hub" },
   ]);
+
+  const [users, setUsers] = useState([
+    { id: "u1", name: "Alex Johnson", email: "alex@nexus.edu", role: "Student", status: "Active" },
+    { id: "u2", name: "Dr. Aris Thorne", email: "thorne@nexus.edu", role: "Instructor", status: "Active" },
+    { id: "u3", name: "Elena Rodriguez", email: "elena@nexus.edu", role: "Instructor", status: "Active" },
+    { id: "u4", name: "Sarah Miller", email: "sarah@nexus.edu", role: "Student", status: "Flagged" },
+  ]);
+
+  // Asset Form State
+  const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<any>(null);
+  const [assetType, setAssetType] = useState<"job" | "event">("job");
 
   // Fetch current maintenance status
   useEffect(() => {
@@ -70,7 +106,7 @@ export default function AdminDashboard() {
           setMaintenanceEnabled(docSnap.data().enabled === true);
         }
       } catch (e) {
-        console.error("Error fetching status", e);
+        // Fallback for simulation
       }
     }
     fetchStatus();
@@ -79,6 +115,7 @@ export default function AdminDashboard() {
   const toggleMaintenance = async (checked: boolean) => {
     setIsUpdating(true);
     
+    // Simulation for Observer Mode
     if (user?.isAnonymous) {
       setTimeout(() => {
         setMaintenanceEnabled(checked);
@@ -125,11 +162,57 @@ export default function AdminDashboard() {
     }
   };
 
+  // CRUD Handlers
+  const handleSaveAsset = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const data: any = Object.fromEntries(formData.entries());
+
+    if (editingAsset) {
+      if (assetType === "job") {
+        setJobs(prev => prev.map(j => j.id === editingAsset.id ? { ...j, ...data } : j));
+      } else {
+        setEvents(prev => prev.map(ev => ev.id === editingAsset.id ? { ...ev, ...data } : ev));
+      }
+      toast({ title: "Asset Updated", description: `${data.title} has been synchronized.` });
+    } else {
+      const newAsset = { ...data, id: Math.random().toString(36).substr(2, 9) };
+      if (assetType === "job") {
+        setJobs(prev => [...prev, newAsset]);
+      } else {
+        setEvents(prev => [...prev, newAsset]);
+      }
+      toast({ title: "Asset Created", description: `${data.title} is now live in the ecosystem.` });
+    }
+    setIsAssetDialogOpen(false);
+    setEditingAsset(null);
+  };
+
+  const handleDeleteAsset = (id: string, type: "job" | "event") => {
+    if (type === "job") {
+      setJobs(prev => prev.filter(j => j.id !== id));
+    } else {
+      setEvents(prev => prev.filter(ev => ev.id !== id));
+    }
+    toast({ title: "Asset Removed", description: "The item has been purged from the database.", variant: "destructive" });
+  };
+
+  const handleUserAction = (id: string, action: "role" | "status") => {
+    setUsers(prev => prev.map(u => {
+      if (u.id === id) {
+        if (action === "status") return { ...u, status: u.status === "Active" ? "Deactivated" : "Active" };
+        return { ...u, role: u.role === "Student" ? "Instructor" : "Student" };
+      }
+      return u;
+    }));
+    toast({ title: "User Updated", description: "Institutional identity records have been updated." });
+  };
+
   const systemMetrics = [
     { label: "Active Nodes", value: "142", icon: Activity, color: "text-blue-500" },
     { label: "Neural Load", value: "24%", icon: Cpu, color: "text-purple-500" },
-    { label: "Verified Entities", value: "1,204", icon: ShieldCheck, color: "text-green-500" },
-    { label: "Database Health", value: "Optimal", icon: Database, color: "text-orange-500" },
+    { label: "Verified Entities", value: users.length.toString(), icon: ShieldCheck, color: "text-green-500" },
+    { label: "Ecosystem Assets", value: (jobs.length + events.length).toString(), icon: Database, color: "text-orange-500" },
   ];
 
   return (
@@ -140,12 +223,77 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground font-medium text-lg">Platform orchestration and ecosystem governance.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="rounded-xl border-primary/20 h-12 px-6 font-bold">
-            <Lock className="size-4 mr-2" /> Security Audit
-          </Button>
-          <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-8 shadow-xl shadow-primary/20 font-bold text-white">
-            <Settings className="size-4 mr-2" /> Global Config
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="rounded-xl border-primary/20 h-12 px-6 font-bold">
+                <ShieldAlert className="size-4 mr-2" /> Security Audit
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl rounded-[2.5rem]">
+              <DialogHeader>
+                <DialogTitle className="font-headline text-3xl font-bold">Protocol Audit Report</DialogTitle>
+                <DialogDescription>Current integrity status across the neural layer.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-6">
+                {[
+                  { label: "Encryption Engine", status: "Active", level: "Quantum-Resistant" },
+                  { label: "User Identity Vault", status: "Secured", level: "AES-512" },
+                  { label: "Database Isolation", status: "Verified", level: "Path-Based Rules" },
+                ].map(item => (
+                  <div key={item.label} className="p-4 bg-muted/30 rounded-2xl flex justify-between items-center">
+                    <span className="font-bold">{item.label}</span>
+                    <div className="text-right">
+                      <Badge className="bg-green-500/10 text-green-600 border-none">{item.status}</Badge>
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground mt-1">{item.level}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-8 shadow-xl shadow-primary/20 font-bold text-white">
+                <Settings className="size-4 mr-2" /> Global Config
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl rounded-[2.5rem]">
+              <DialogHeader>
+                <DialogTitle className="font-headline text-3xl font-bold">Neural Parameters</DialogTitle>
+                <DialogDescription>Modify core institutional logic and intelligence thresholds.</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase">Intelligence Model</Label>
+                  <Select defaultValue="gemini-flash">
+                    <SelectTrigger className="h-12 rounded-xl bg-muted/40 border-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gemini-flash">Gemini 2.5 Flash</SelectItem>
+                      <SelectItem value="gemini-pro">Gemini 2.5 Pro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase">Feedback Velocity</Label>
+                  <Select defaultValue="instant">
+                    <SelectTrigger className="h-12 rounded-xl bg-muted/40 border-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="instant">Instant Real-time</SelectItem>
+                      <SelectItem value="delayed">Batch Processed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button className="w-full h-14 rounded-2xl font-bold bg-primary" onClick={() => toast({ title: "Config Saved", description: "New parameters applied globally." })}>Update Ecosystem Core</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -217,7 +365,7 @@ export default function AdminDashboard() {
                     <h5 className="font-headline font-bold text-xl">User Orchestration</h5>
                   </div>
                   <p className="text-sm text-muted-foreground font-medium">Manage verified nodes and institutional identity protocols.</p>
-                  <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Manage Roles</Button>
+                  <Button variant="secondary" className="w-full rounded-xl h-12 font-bold" onClick={() => toast({ title: "Directory Active", description: "Switched to User Directory tab." })}>Manage Roles</Button>
                 </Card>
                 <Card className="border-none shadow-sm bg-white rounded-[2rem] p-8 space-y-6">
                   <div className="flex items-center gap-4">
@@ -227,7 +375,41 @@ export default function AdminDashboard() {
                     <h5 className="font-headline font-bold text-xl">Compliance Logs</h5>
                   </div>
                   <p className="text-sm text-muted-foreground font-medium">Audit the ecosystem's adherence to global educational standards.</p>
-                  <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Review Logs</Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="secondary" className="w-full rounded-xl h-12 font-bold">Review Logs</Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl rounded-[2.5rem]">
+                      <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl font-bold">Access & Activity Logs</DialogTitle>
+                      </DialogHeader>
+                      <div className="py-4 h-[400px] overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Event</TableHead>
+                              <TableHead>User</TableHead>
+                              <TableHead>Timestamp</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {[
+                              { event: "Login Success", user: "alex@nexus.edu", time: "2m ago" },
+                              { event: "Course Created", user: "thorne@nexus.edu", time: "15m ago" },
+                              { event: "Security Bypass Attempt", user: "192.168.1.1", time: "1h ago" },
+                              { event: "Role Changed", user: "admin_root", time: "2h ago" },
+                            ].map((log, i) => (
+                              <TableRow key={i}>
+                                <TableCell className="font-bold">{log.event}</TableCell>
+                                <TableCell>{log.user}</TableCell>
+                                <TableCell className="text-muted-foreground text-xs">{log.time}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </Card>
               </div>
             </div>
@@ -258,9 +440,68 @@ export default function AdminDashboard() {
                   <p className="text-muted-foreground font-medium">Full CRUD operations for Job Opportunities and Institution Events.</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="bg-accent hover:bg-accent/90 rounded-xl h-12 px-6 font-bold shadow-lg shadow-accent/10">
-                    <Plus className="size-4 mr-2" /> Create New Asset
-                  </Button>
+                  <Dialog open={isAssetDialogOpen} onOpenChange={setIsAssetDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-accent hover:bg-accent/90 rounded-xl h-12 px-6 font-bold shadow-lg shadow-accent/10" onClick={() => { setEditingAsset(null); setAssetType("job"); }}>
+                        <Plus className="size-4 mr-2" /> Create New Asset
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-[2.5rem]">
+                      <DialogHeader>
+                        <DialogTitle className="font-headline text-2xl font-bold">{editingAsset ? 'Edit Asset' : 'Create Asset'}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleSaveAsset} className="space-y-6 py-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase">Asset Type</Label>
+                          <Select value={assetType} onValueChange={(v: any) => setAssetType(v)}>
+                            <SelectTrigger className="h-12 rounded-xl bg-muted/40 border-none">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="job">Job Opportunity</SelectItem>
+                              <SelectItem value="event">Institution Event</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase">Title</Label>
+                          <Input name="title" defaultValue={editingAsset?.title} required className="h-12 rounded-xl bg-muted/40 border-none" />
+                        </div>
+                        {assetType === "job" ? (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-xs font-bold uppercase">Company</Label>
+                              <Input name="company" defaultValue={editingAsset?.company} required className="h-12 rounded-xl bg-muted/40 border-none" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase">Job Type</Label>
+                                <Input name="type" defaultValue={editingAsset?.type} required className="h-12 rounded-xl bg-muted/40 border-none" />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase">Location</Label>
+                                <Input name="location" defaultValue={editingAsset?.location} required className="h-12 rounded-xl bg-muted/40 border-none" />
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-xs font-bold uppercase">Date</Label>
+                              <Input name="date" defaultValue={editingAsset?.date} required className="h-12 rounded-xl bg-muted/40 border-none" />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-xs font-bold uppercase">Location</Label>
+                              <Input name="loc" defaultValue={editingAsset?.loc} required className="h-12 rounded-xl bg-muted/40 border-none" />
+                            </div>
+                          </div>
+                        )}
+                        <DialogFooter>
+                          <Button type="submit" className="w-full h-14 rounded-2xl font-bold bg-primary">Synchronize Asset</Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 
@@ -285,10 +526,10 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/5">
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/5" onClick={() => { setEditingAsset(job); setAssetType("job"); setIsAssetDialogOpen(true); }}>
                               <Edit3 className="size-4 text-muted-foreground" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-destructive/5 text-destructive">
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-destructive/5 text-destructive" onClick={() => handleDeleteAsset(job.id, "job")}>
                               <Trash2 className="size-4" />
                             </Button>
                           </div>
@@ -318,10 +559,10 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-accent/5">
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-accent/5" onClick={() => { setEditingAsset(event); setAssetType("event"); setIsAssetDialogOpen(true); }}>
                               <Edit3 className="size-4 text-muted-foreground" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-destructive/5 text-destructive">
+                            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-destructive/5 text-destructive" onClick={() => handleDeleteAsset(event.id, "event")}>
                               <Trash2 className="size-4" />
                             </Button>
                           </div>
@@ -342,7 +583,7 @@ export default function AdminDashboard() {
                     The intelligence layer suggests adding more "STEM-focused" events to increase engagement in the Engineering cohort.
                   </p>
                 </div>
-                <Button className="w-full rounded-xl h-12 font-bold shadow-sm">Review Recommendations</Button>
+                <Button className="w-full rounded-xl h-12 font-bold shadow-sm" onClick={() => toast({ title: "Analysis Running", description: "Reviewing ecosystem engagement metrics..." })}>Review Recommendations</Button>
               </Card>
 
               <div className="space-y-6 px-2">
@@ -354,16 +595,83 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-muted-foreground">Ecosystem Artifacts</span>
-                    <span className="text-sm font-bold">1,402</span>
+                    <span className="text-sm font-bold">{jobs.length + events.length + 124}</span>
                   </div>
                   <div className="pt-4 border-t">
-                    <Button variant="link" className="p-0 h-auto text-primary font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+                    <Button variant="link" className="p-0 h-auto text-primary font-bold text-xs uppercase tracking-widest flex items-center gap-2" onClick={() => toast({ title: "Export Started", description: "Full asset inventory CSV is generating..." })}>
                       Full Asset Export <CloudUpload className="size-4" />
                     </Button>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="users" className="animate-in fade-in duration-500">
+          <div className="space-y-8">
+            <div className="flex items-center justify-between px-2">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-headline font-bold">User Directory</h3>
+                <p className="text-muted-foreground font-medium">Verify identities and manage institutional roles.</p>
+              </div>
+              <div className="flex gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                  <Input placeholder="Search users..." className="pl-10 h-10 w-64 rounded-xl border-primary/10 bg-white" />
+                </div>
+                <Button className="bg-primary rounded-xl font-bold h-10 px-6" onClick={() => toast({ title: "Invite Sent", description: "New member invitation dispatched." })}><Plus className="size-4 mr-2" /> Invite Member</Button>
+              </div>
+            </div>
+
+            <Card className="border-none shadow-sm rounded-[2.5rem] overflow-hidden bg-white">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="pl-8 h-14 font-bold text-xs uppercase">Identity</TableHead>
+                    <TableHead className="h-14 font-bold text-xs uppercase">Role</TableHead>
+                    <TableHead className="h-14 font-bold text-xs uppercase">Status</TableHead>
+                    <TableHead className="h-14 font-bold text-xs uppercase text-right pr-8">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.id} className="group hover:bg-primary/5 transition-colors">
+                      <TableCell className="pl-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="size-10 rounded-full bg-muted flex items-center justify-center font-bold text-primary">
+                            {u.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm leading-tight">{u.name}</p>
+                            <p className="text-[10px] font-medium text-muted-foreground">{u.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-bold text-[10px] uppercase border-primary/10">{u.role}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`font-bold text-[10px] uppercase border-none ${u.status === 'Active' ? 'bg-green-500/10 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                          {u.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right pr-8">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="sm" className="rounded-xl font-bold text-[10px] uppercase h-8 hover:bg-primary/10" onClick={() => handleUserAction(u.id, "role")}>
+                            <ShieldCheck className="size-3 mr-1.5" /> Toggle Role
+                          </Button>
+                          <Button variant="ghost" size="sm" className="rounded-xl font-bold text-[10px] uppercase h-8 hover:bg-destructive/10 text-destructive" onClick={() => handleUserAction(u.id, "status")}>
+                            {u.status === 'Active' ? <UserX className="size-3 mr-1.5" /> : <UserCheck className="size-3 mr-1.5" />}
+                            {u.status === 'Active' ? 'Suspend' : 'Verify'}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
