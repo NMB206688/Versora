@@ -17,6 +17,7 @@ import {
   BookOpen,
   Trophy,
   ArrowUpRight,
+  ArrowRight,
   Target,
   LineChart,
   GraduationCap,
